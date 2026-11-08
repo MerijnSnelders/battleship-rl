@@ -28,6 +28,10 @@ _Avoid_: Position, deployment
 The ships a game config prescribes for each player, given as ship lengths. Several ships may share a length.
 _Avoid_: Army, ship set
 
+**Randomly placed fleet**:
+The whole fleet placed on an empty board by chance, so the board is complete. Every complete board is equally likely, and the same seed always gives the same board.
+_Avoid_: Random fleet, random board
+
 ## Rules of placement
 
 - A placement is legal when the ship lies fully on the board, does not overlap another ship, and its length is still needed by the fleet.
