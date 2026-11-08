@@ -9,6 +9,7 @@ from battleship.board import (
     InvalidPlacementError,
     OffBoardError,
     OverlapError,
+    PlacementFailedError,
     ShipNotInFleetError,
 )
 from battleship.config import SMALL, STANDARD, GameConfig
@@ -22,6 +23,7 @@ __all__ = [
     "OffBoardError",
     "Orientation",
     "OverlapError",
+    "PlacementFailedError",
     "SMALL",
     "STANDARD",
     "Ship",

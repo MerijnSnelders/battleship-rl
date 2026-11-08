@@ -4,8 +4,13 @@ from collections import Counter
 from collections.abc import Iterable
 from typing import Self
 
+import numpy as np
+
 from battleship.config import GameConfig
-from battleship.ship import Ship
+from battleship.ship import Orientation, Ship
+
+MAX_PLACEMENT_TRIES = 100_000
+"""How many random boards `Board.with_random_fleet` tries before giving up."""
 
 
 class InvalidPlacementError(ValueError):
@@ -28,6 +33,10 @@ class IncompleteFleetError(ValueError):
     """The ships given do not make up the whole fleet."""
 
 
+class PlacementFailedError(ValueError):
+    """No randomly placed fleet was found within the allowed number of tries."""
+
+
 class Board:
     """One player's grid of squares and the ships placed on it."""
 
@@ -44,6 +53,29 @@ class Board:
         if not board.is_complete:
             raise IncompleteFleetError("the ships given do not make up the whole fleet")
         return board
+
+    @classmethod
+    def with_random_fleet(
+        cls, config: GameConfig, rng: int | np.random.Generator | None = None
+    ) -> Self:
+        """Build a complete board with a randomly placed fleet.
+
+        Every complete board is equally likely: each ship gets a placement chosen uniformly
+        from all placements that fit on the board, and the whole board is drawn again
+        whenever two ships overlap. `rng` is a seed or a numpy Generator (which is advanced,
+        so an RL environment can pass its own); the same seed always gives the same board.
+        Ships come out in fleet order.
+        """
+        generator = np.random.default_rng(rng)
+        for _ in range(MAX_PLACEMENT_TRIES):
+            ships = [_random_ship(config.size, length, generator) for length in config.ships]
+            covered = [square for ship in ships for square in ship.squares]
+            if len(covered) == len(set(covered)):
+                return cls.from_ships(config, ships)
+        raise PlacementFailedError(
+            f"no randomly placed fleet found in {MAX_PLACEMENT_TRIES} tries; "
+            "the fleet is too crowded for this board"
+        )
 
     @property
     def ships(self) -> tuple[Ship, ...]:
@@ -80,3 +112,12 @@ class Board:
         taken = {square for placed in self._ships for square in placed.squares}
         if taken.intersection(ship.squares):
             raise OverlapError(f"ship at {ship.start} overlaps another ship")
+
+
+def _random_ship(size: int, length: int, generator: np.random.Generator) -> Ship:
+    """A ship chosen uniformly from every placement of this length that fits on the board."""
+    orientation = Orientation.HORIZONTAL if generator.integers(2) == 0 else Orientation.VERTICAL
+    along = int(generator.integers(size - length + 1))
+    across = int(generator.integers(size))
+    start = (across, along) if orientation is Orientation.HORIZONTAL else (along, across)
+    return Ship(start=start, length=length, orientation=orientation)
