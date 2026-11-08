@@ -7,7 +7,8 @@ from typing import Self
 import numpy as np
 
 from battleship.config import GameConfig
-from battleship.ship import Orientation, Ship
+from battleship.ship import Orientation, Ship, Square
+from battleship.shot import ShotOutcome, ShotResult
 
 MAX_PLACEMENT_TRIES = 100_000
 """How many random boards `Board.with_random_fleet` tries before giving up."""
@@ -37,12 +38,30 @@ class PlacementFailedError(ValueError):
     """No randomly placed fleet was found within the allowed number of tries."""
 
 
+class InvalidShotError(ValueError):
+    """A shot cannot be fired at the board as requested."""
+
+
+class ShotOffBoardError(InvalidShotError):
+    """The square fired at lies outside the board."""
+
+
+class RepeatShotError(InvalidShotError):
+    """The square has already been fired at."""
+
+
+class GameOverError(InvalidShotError):
+    """Every ship on the board is already sunk, so no more shots are accepted."""
+
+
 class Board:
     """One player's grid of squares and the ships placed on it."""
 
     def __init__(self, config: GameConfig) -> None:
         self.config = config
         self._ships: list[Ship] = []
+        self._shots: list[ShotResult] = []
+        self._fired: set[Square] = set()
 
     @classmethod
     def from_ships(cls, config: GameConfig, ships: Iterable[Ship]) -> Self:
@@ -86,6 +105,54 @@ class Board:
     def is_complete(self) -> bool:
         """Whether every ship of the fleet has been placed."""
         return len(self._ships) == len(self.config.ships)
+
+    @property
+    def shots(self) -> tuple[ShotResult, ...]:
+        """Every shot fired at this board, in the order it was fired."""
+        return tuple(self._shots)
+
+    @property
+    def shot_count(self) -> int:
+        """How many shots have been fired at this board."""
+        return len(self._shots)
+
+    @property
+    def is_game_over(self) -> bool:
+        """Whether every ship on this complete board has been sunk."""
+        return self.is_complete and all(self._is_sunk(ship) for ship in self._ships)
+
+    def fire(self, square: Square) -> ShotResult:
+        """Fire at a square and return what it reveals, or raise and change nothing.
+
+        Raises IncompleteFleetError if the fleet is not fully placed yet, GameOverError if
+        every ship is already sunk, ShotOffBoardError for a square outside the board and
+        RepeatShotError for a square fired at before. Rejected shots are not counted.
+        """
+        if not self.is_complete:
+            raise IncompleteFleetError("cannot fire before the whole fleet is placed")
+        if self.is_game_over:
+            raise GameOverError("every ship is already sunk")
+        row, col = square
+        square = (int(row), int(col))
+        size = self.config.size
+        if not (0 <= square[0] < size and 0 <= square[1] < size):
+            raise ShotOffBoardError(f"square {square} is not on a {size}x{size} board")
+        if square in self._fired:
+            raise RepeatShotError(f"square {square} has already been fired at")
+
+        self._fired.add(square)
+        ship = next((ship for ship in self._ships if square in ship.squares), None)
+        if ship is None:
+            result = ShotResult(square, ShotOutcome.MISS)
+        elif self._is_sunk(ship):
+            result = ShotResult(square, ShotOutcome.SUNK, sunk_ship=ship)
+        else:
+            result = ShotResult(square, ShotOutcome.HIT)
+        self._shots.append(result)
+        return result
+
+    def _is_sunk(self, ship: Ship) -> bool:
+        return self._fired.issuperset(ship.squares)
 
     def can_place(self, ship: Ship) -> bool:
         """Whether `place` would accept this ship right now."""

@@ -32,6 +32,25 @@ _Avoid_: Army, ship set
 The whole fleet placed on an empty board by chance, so the board is complete. Every complete board is equally likely, and the same seed always gives the same board.
 _Avoid_: Random fleet, random board
 
+**Shot**:
+Firing at one square of the opponent's board. Each square can be fired at only once, and only once the board is complete. The shots fired at a board are counted and remembered in order, each with the square and what it revealed.
+_Avoid_: Attack, guess, move, strike
+
+**Miss**:
+A shot at a square that no ship covers.
+_Avoid_: Splash, water
+
+**Hit**:
+A shot at a square covered by a ship that still has unhit squares afterwards.
+
+**Sunk**:
+What a shot reveals when it hits the last unhit square of a ship. The ship is then sunk, and its length and squares become known to the shooter.
+_Avoid_: Destroyed, killed
+
+**Game over**:
+Every ship on a board is sunk. No more shots may be fired at that board.
+_Avoid_: Win, finished
+
 ## Rules of placement
 
 - A placement is legal when the ship lies fully on the board, does not overlap another ship, and its length is still needed by the fleet.
