@@ -19,6 +19,7 @@ from battleship.board import (
 from battleship.config import SMALL, STANDARD, GameConfig
 from battleship.ship import Orientation, Ship, Square
 from battleship.shot import ShotOutcome, ShotResult
+from battleship.view import PlayerView, SquareState
 
 __all__ = [
     "Board",
@@ -31,6 +32,7 @@ __all__ = [
     "Orientation",
     "OverlapError",
     "PlacementFailedError",
+    "PlayerView",
     "RepeatShotError",
     "SMALL",
     "STANDARD",
@@ -40,4 +42,5 @@ __all__ = [
     "ShotOutcome",
     "ShotResult",
     "Square",
+    "SquareState",
 ]
