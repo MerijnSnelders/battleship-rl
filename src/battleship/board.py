@@ -9,6 +9,7 @@ import numpy as np
 from battleship.config import GameConfig
 from battleship.ship import Orientation, Ship, Square
 from battleship.shot import ShotOutcome, ShotResult
+from battleship.view import PlayerView
 
 MAX_PLACEMENT_TRIES = 100_000
 """How many random boards `Board.with_random_fleet` tries before giving up."""
@@ -120,6 +121,10 @@ class Board:
     def is_game_over(self) -> bool:
         """Whether every ship on this complete board has been sunk."""
         return self.is_complete and all(self._is_sunk(ship) for ship in self._ships)
+
+    def view(self) -> PlayerView:
+        """A snapshot of this board as the shooter sees it: never any unhit ship square."""
+        return PlayerView.from_shots(self.config.size, self.shots, self.is_game_over)
 
     def fire(self, square: Square) -> ShotResult:
         """Fire at a square and return what it reveals, or raise and change nothing.

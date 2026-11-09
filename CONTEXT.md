@@ -47,6 +47,10 @@ A shot at a square covered by a ship that still has unhit squares afterwards.
 What a shot reveals when it hits the last unhit square of a ship. The ship is then sunk, and its length and squares become known to the shooter.
 _Avoid_: Destroyed, killed
 
+**Player view**:
+What the shooter knows about one board: for each square, whether it is unknown, a miss, a hit or sunk, plus the ships sunk so far. It never reveals a square that has not been fired at. Every square of a sunk ship shows as sunk, so a hit always belongs to a ship that is still afloat.
+_Avoid_: Opponent view, tracking board, observation
+
 **Game over**:
 Every ship on a board is sunk. No more shots may be fired at that board.
 _Avoid_: Win, finished
