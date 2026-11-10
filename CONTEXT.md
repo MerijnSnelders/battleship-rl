@@ -51,6 +51,14 @@ _Avoid_: Destroyed, killed
 What the shooter knows about one board: for each square, whether it is unknown, a miss, a hit or sunk, plus the ships sunk so far. It never reveals a square that has not been fired at. Every square of a sunk ship shows as sunk, so a hit always belongs to a ship that is still afloat.
 _Avoid_: Opponent view, tracking board, observation
 
+**AI**:
+A shooter that picks every shot from only the player view of the board it fires at and the game config. It is told when a new game starts, and from then on behaves as if it had never played before.
+_Avoid_: Bot, opponent, strategy, agent (except for the RL agent, which is one kind of AI)
+
+**Heatmap**:
+An AI's score for every square, showing how much it wants to fire there. Only some AIs have one.
+_Avoid_: Probability map, heat map
+
 **Game over**:
 Every ship on a board is sunk. No more shots may be fired at that board.
 _Avoid_: Win, finished
