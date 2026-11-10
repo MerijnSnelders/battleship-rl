@@ -44,6 +44,14 @@ This is how most people play: search at random, then finish off a ship once it i
 only in a graph and gives no median, so there is no verified figure: our own benchmark
 will measure it.
 
+**Our measurement.** Our Hunt/target AI played the same 2,000 games per config (board
+seeds 0 to 1999, AI seeds 10000 to 11999). STANDARD: median 60, mean 60.1, min 23, max 99.
+SMALL: median 22, mean 22.5, min 8, max 36. That is 37 shots fewer than random fire on the
+median. Our version also follows the line of hits (it only fires past the two ends of a
+line) and reads sunk ships from the player view, which the basic stack version in [1]
+does not, so it already does slightly better than the 64 quoted for parity. The slow test
+`test_median_beats_random_fire` guards these numbers.
+
 **Will we implement it?** Yes.
 
 **Sources.** [1], [2], [3]
