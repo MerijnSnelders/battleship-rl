@@ -88,6 +88,15 @@ Two things are worth noting:
 **Expected performance.** A median of 42 shots, and in 100 million simulated games no
 game took longer than 73 shots [1]. This is far better than random fire and hunt/target.
 
+**Our measurement.** Our Probability density AI played the same 2,000 games per config
+(board seeds 0 to 1999, AI seeds 10000 to 11999). STANDARD: median 44, mean 44.6, min 22,
+max 71. SMALL: median 18, mean 17.9, min 8, max 27. That is close to the source's 42 and
+16 shots fewer than our Hunt/target AI on the median. Each placement counts 100 times
+more for every hit it covers (`HIT_WEIGHT`), so one hit outweighs everything else and a
+line of hits is followed automatically. A move takes 0.4 ms on average and 6 ms at most
+on STANDARD, well under the 50 ms limit. The slow tests `test_median_beats_hunt_target`
+and `test_a_move_on_standard_takes_under_50_ms` guard these numbers.
+
 **Will we implement it?** Yes.
 
 **Sources.** [1], [2], [3]

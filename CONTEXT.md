@@ -71,6 +71,14 @@ _Avoid_: Search mode, random mode
 Finishing off a ship that has been hit: a shot next to the hits. Once two or more hits form a line, only the squares just past its ends are fired at, until both ends are blocked.
 _Avoid_: Kill mode, destroy mode
 
+**Possible placement**:
+A placement of a ship still afloat that lies fully on the board and covers no miss and no sunk square, so the player view does not rule it out. It may cover hits. Each ship is judged on its own, so two possible placements may overlap.
+_Avoid_: Legal placement (that means the board's own placement rules), candidate, option
+
+**Probability density AI**:
+The AI that counts, for every square, the possible placements covering it, and fires at a square with the highest count. A placement counts more heavily for every hit it covers, so it finishes off ships it has found.
+_Avoid_: Density AI, probability AI, heatmap AI
+
 **Heatmap**:
 An AI's score for every square, showing how much it wants to fire there. Only some AIs have one.
 _Avoid_: Probability map, heat map
