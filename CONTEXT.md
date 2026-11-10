@@ -59,6 +59,18 @@ _Avoid_: Bot, opponent, strategy, agent (except for the RL agent, which is one k
 The baseline AI: every shot goes to a square chosen uniformly at random from the squares not fired at yet. It ignores hits and sunk ships entirely, so it is the lower bound every other AI must beat.
 _Avoid_: Random fire, random strategy, dumb AI
 
+**Hunt/target AI**:
+The human-like AI: it fires in hunt mode while no hit is on the board and in target mode while at least one is. It stays in target mode after a sink if another ship has already been hit.
+_Avoid_: Hunt AI, target AI, smart AI
+
+**Hunt mode**:
+Searching for a ship: a shot at a square chosen uniformly at random from the squares not fired at yet, exactly like the Random AI.
+_Avoid_: Search mode, random mode
+
+**Target mode**:
+Finishing off a ship that has been hit: a shot next to the hits. Once two or more hits form a line, only the squares just past its ends are fired at, until both ends are blocked.
+_Avoid_: Kill mode, destroy mode
+
 **Heatmap**:
 An AI's score for every square, showing how much it wants to fire there. Only some AIs have one.
 _Avoid_: Probability map, heat map
