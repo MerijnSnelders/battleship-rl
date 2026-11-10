@@ -17,7 +17,7 @@ Hosted Battleship game against heuristic AIs and a self-trained RL agent. It is 
 
 ## Workflow
 
-1. Branch from `develop`: `feature/<issue>-<short-name>` or `fix/<issue>-<short-name>`.
+1. Branch from `develop`: `<issue>-<short-name>`, for example `9-random-ai`.
 2. Done means: acceptance criteria in the issue all ticked, tests added for new behaviour, `uv run ruff check .`, `uv run ruff format --check .` and `uv run pytest` green.
 3. PR into `develop` with `Closes #<issue>`. `main` only receives release PRs from `develop`, and every push to `main` deploys to Hugging Face Spaces.
 

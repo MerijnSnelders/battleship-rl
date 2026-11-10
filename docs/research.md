@@ -18,6 +18,13 @@ ignores everything it has learned, including hits.
 median game takes 96 shots [1], so on average almost the whole board has to be shot
 before the last ship sinks. This is the lower bound every other strategy must beat.
 
+**Our measurement.** Our Random AI played 2,000 games per config (board seeds 0 to 1999,
+AI seeds 10000 to 11999). STANDARD (10x10, 17 ship squares): median 97, mean 95.6, min 69,
+max 100. SMALL (6x6, 7 ship squares): median 33, mean 32.4, min 17, max 36. Both agree with
+theory: the shot count is the position of the last ship square in a random order of the
+board, so the expected mean is 17 x 101 / 18 = 95.4 on STANDARD and 7 x 37 / 8 = 32.4 on
+SMALL. The slow test `test_median_matches_random_fire_theory` guards these numbers.
+
 **Will we implement it?** Yes, as the baseline AI.
 
 **Sources.** [1], [2], [3]

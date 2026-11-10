@@ -55,6 +55,10 @@ _Avoid_: Opponent view, tracking board, observation
 A shooter that picks every shot from only the player view of the board it fires at and the game config. It is told when a new game starts, and from then on behaves as if it had never played before.
 _Avoid_: Bot, opponent, strategy, agent (except for the RL agent, which is one kind of AI)
 
+**Random AI**:
+The baseline AI: every shot goes to a square chosen uniformly at random from the squares not fired at yet. It ignores hits and sunk ships entirely, so it is the lower bound every other AI must beat.
+_Avoid_: Random fire, random strategy, dumb AI
+
 **Heatmap**:
 An AI's score for every square, showing how much it wants to fire there. Only some AIs have one.
 _Avoid_: Probability map, heat map
