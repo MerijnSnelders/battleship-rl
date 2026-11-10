@@ -51,7 +51,7 @@ class ProbabilityDensityAI(AI):
         blocked = (grid == SquareState.MISS) | (grid == SquareState.SUNK)
         hits = (grid == SquareState.HIT).astype(np.int64)
         counts = np.zeros((view.size, view.size), dtype=np.int64)
-        for length, ships in _remaining_ships(self.config.ships, view).items():
+        for length, ships in remaining_ships(self.config.ships, view).items():
             row_counts = _row_counts(blocked, hits, length)
             col_counts = _row_counts(blocked.T, hits.T, length).T
             counts += ships * (row_counts + col_counts)
@@ -59,7 +59,7 @@ class ProbabilityDensityAI(AI):
         return counts
 
 
-def _remaining_ships(fleet: tuple[int, ...], view: PlayerView) -> Counter[int]:
+def remaining_ships(fleet: tuple[int, ...], view: PlayerView) -> Counter[int]:
     """How many ships of each length are still afloat."""
     remaining = Counter(fleet)
     remaining.subtract(ship.length for ship in view.sunk_ships)

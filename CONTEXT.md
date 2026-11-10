@@ -79,6 +79,17 @@ _Avoid_: Legal placement (that means the board's own placement rules), candidate
 The AI that counts, for every square, the possible placements covering it, and fires at a square with the highest count. A placement counts more heavily for every hit it covers, so it finishes off ships it has found.
 _Avoid_: Density AI, probability AI, heatmap AI
 
+**Possible layout**:
+All the ships still afloat placed together so the player view does not rule them out: no two overlap, none covers a miss or a sunk square, and together they cover every hit. Unlike possible placements, a possible layout respects that ships cannot overlap.
+_Avoid_: Consistent layout, configuration, arrangement
+
+**Sample**:
+One possible layout drawn at random, every possible layout being equally likely.
+
+**Monte Carlo AI**:
+The AI that draws many samples, and fires at the square not fired at yet that holds a ship in the most of them. When no sample can be found, it counts possible placements the way the Probability density AI does instead.
+_Avoid_: MC AI, sampling AI, simulation AI
+
 **Heatmap**:
 An AI's score for every square, showing how much it wants to fire there. Only some AIs have one.
 _Avoid_: Probability map, heat map
