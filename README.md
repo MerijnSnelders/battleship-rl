@@ -52,7 +52,7 @@ Training dependencies are optional: `uv sync --extra rl`.
 
 ## Roadmap
 
-- [ ] **v0.1** Game engine with tests
+- [x] **v0.1** Game engine with tests
 - [ ] **v0.2** Heuristic AIs and benchmark
 - [ ] **v0.3** Playable online
 - [ ] **v0.4** Trained agent in the game
