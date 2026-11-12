@@ -98,6 +98,18 @@ _Avoid_: Probability map, heat map
 Every ship on a board is sunk. No more shots may be fired at that board.
 _Avoid_: Win, finished
 
+**Benchmark game**:
+One AI firing at one randomly placed fleet until game over. There is no opponent firing back, so nobody wins or loses.
+_Avoid_: Match, round, episode (except inside RL training)
+
+**Shots to finish**:
+The number of shots a benchmark game took. Fewer is better. Its lowest possible value is the number of squares the fleet covers, its highest the number of squares on the board.
+_Avoid_: Shots to win, score, game length
+
+**Benchmark**:
+Every AI playing the same set of benchmark games, board for board, so their shots to finish can be compared directly.
+_Avoid_: Evaluation, tournament
+
 ## Rules of placement
 
 - A placement is legal when the ship lies fully on the board, does not overlap another ship, and its length is still needed by the fleet.

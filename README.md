@@ -1,6 +1,6 @@
  battleship-rl
 
-Play Battleship against four AI opponents, from a random shooter to a reinforcement learning agent I trained myself, and see exactly how good each one is.
+Play Battleship against five AI opponents, from a random shooter to a reinforcement learning agent I trained myself, and see exactly how good each one is.
 
 > **Status:** in development. Live demo and results arrive with the milestones below.
 
@@ -10,14 +10,24 @@ How does a reinforcement learning agent compare to heuristic strategies in Battl
 
 ## The opponents
 
-| Opponent | Strategy | Average shots to win |
-| --- | --- | --- |
-| Random | Fires at any unfired square | measured in M2 |
-| Hunt/target | Random until a hit, then fires at neighbours | measured in M2 |
-| Probability map | Fires where the remaining ships fit in the most ways | measured in M2 |
-| RL agent | MaskablePPO, trained with Stable-Baselines3 | measured in M4 |
+| Opponent | Strategy | Mean | Median | Std |
+| --- | --- | --- | --- | --- |
+| Random | Fires at any unfired square | 95.4 | 97 | 4.8 |
+| Hunt/target | Random until a hit, then fires at neighbours | 59.5 | 59 | 14.8 |
+| Probability density | Fires where the remaining ships fit in the most ways | 44.7 | 44 | 9.2 |
+| Monte Carlo | Samples possible layouts of the remaining ships, fires where a ship lies most often | 45.1 | 44 | 9.2 |
+| RL agent | MaskablePPO, trained with Stable-Baselines3 | measured in M4 | | |
 
-Every opponent plays 10,000 games on random boards. Fewer shots is better.
+Shots to finish a 10x10 board with ships of length 5, 4, 3, 3 and 2. Every opponent plays the same 10,000 seeded random boards, so fewer shots is better and the numbers compare board for board. The 95% confidence interval of every mean is narrower than ±0.3 shots.
+
+![Distribution of shots to finish per AI](results/benchmark.png)
+
+Reproduce it (about five minutes on 12 cores; full results in `results/benchmark.json`):
+
+```bash
+uv run python -m battleship.benchmark
+uv run python -m battleship.benchmark --config small
+```
 
 ## How it works
 
