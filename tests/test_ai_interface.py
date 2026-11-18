@@ -1,66 +1,17 @@
-import numpy as np
 import pytest
+from conftest import FirstUnknownAI, RandomWithHeatmapAI, every_ai, play
 
 from battleship.ai import AI, UnknownAIError, create, names, register
 from battleship.ai import registry as registry_module
 from battleship.board import Board, GameOverError
 from battleship.config import SMALL, STANDARD
-from battleship.view import SquareState
 
 configs = pytest.mark.parametrize("config", [SMALL, STANDARD], ids=["small", "standard"])
-
-
-class FirstUnknownAI(AI):
-    """Test-only AI: fires at the first square not fired at yet."""
-
-    def _choose_shot(self, view):
-        return self.unknown_squares(view)[0]
-
-
-class RandomWithHeatmapAI(AI):
-    """Test-only AI: fires at random using its rng and shows a flat heatmap."""
-
-    def _choose_shot(self, view):
-        squares = self.unknown_squares(view)
-        return squares[int(self.rng.integers(len(squares)))]
-
-    def _heatmap(self, view):
-        return (view.to_array() == SquareState.UNKNOWN).astype(float)
-
-
-TEST_AIS = {"first_unknown": FirstUnknownAI, "random_with_heatmap": RandomWithHeatmapAI}
-
-
-def every_ai():
-    """Factories for the test-only AIs and every registered AI, so new AIs are covered."""
-    factories = dict(TEST_AIS)
-    for name in names():
-        factories[name] = lambda name=name: create(name)
-    return pytest.mark.parametrize("make_ai", factories.values(), ids=factories.keys())
 
 
 @pytest.fixture
 def clean_registry(monkeypatch):
     monkeypatch.setattr(registry_module, "_REGISTRY", {})
-
-
-def play(ai, config, seed):
-    """Play one full game on a seeded board and return the shots in order."""
-    board = Board.with_random_fleet(config, seed)
-    ai.new_game(config, seed)
-    shots = []
-    while not board.is_game_over:
-        view = board.view()
-        heatmap = ai.heatmap(view)
-        if heatmap is not None:
-            assert heatmap.shape == (config.size, config.size)
-            assert np.all(heatmap >= 0)
-            assert np.all(heatmap[view.to_array() != SquareState.UNKNOWN] == 0)
-        shot = ai.choose_shot(view)
-        board.fire(shot)  # raises for a square off the board or fired at before
-        shots.append(shot)
-        assert len(shots) <= config.cells
-    return shots
 
 
 # Contract: every AI
@@ -69,22 +20,22 @@ def play(ai, config, seed):
 @every_ai()
 @configs
 def test_ai_finishes_a_game_with_legal_shots(make_ai, config):
-    shots = play(make_ai(), config, seed=1)
+    shots = play(make_ai(), config, 1)
     assert len(shots) == len(set(shots))
 
 
 @every_ai()
 @configs
 def test_same_seed_gives_the_same_game(make_ai, config):
-    assert play(make_ai(), config, seed=7) == play(make_ai(), config, seed=7)
+    assert play(make_ai(), config, 7) == play(make_ai(), config, 7)
 
 
 @every_ai()
 @configs
 def test_reused_ai_plays_like_a_fresh_one(make_ai, config):
     reused = make_ai()
-    play(reused, config, seed=3)
-    assert play(reused, config, seed=4) == play(make_ai(), config, seed=4)
+    play(reused, config, 3)
+    assert play(reused, config, 4) == play(make_ai(), config, 4)
 
 
 @every_ai()

@@ -130,13 +130,6 @@ def test_command_line_refuses_mismatched_merge(tmp_path, capsys):
 
 
 @pytest.mark.slow
-def test_every_ai_finishes_on_both_configs():
-    for config in [SMALL, STANDARD]:
-        results = run_benchmark(list(names()), config, games=5, workers=2)
-        assert all(len(result.shots) == 5 for result in results.values())
-
-
-@pytest.mark.slow
 def test_ais_rank_as_expected():
     results = run_benchmark(["random", "hunt_target", "probability_density"], STANDARD, 200, 0, 4)
     means = {name: result.mean for name, result in results.items()}
