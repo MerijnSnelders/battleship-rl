@@ -24,6 +24,9 @@ class HuntTargetAI(AI):
     a sink as long as another ship has been hit.
     """
 
+    display_name = "Hunt/target"
+    description = "Fires at random until it hits, then at the squares next to its hits."
+
     def _choose_shot(self, view: PlayerView) -> Square:
         squares = self.target_squares(view) or self.unknown_squares(view)
         return squares[int(self.rng.integers(len(squares)))]

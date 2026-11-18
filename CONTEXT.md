@@ -110,6 +110,26 @@ _Avoid_: Shots to win, score, game length
 Every AI playing the same set of benchmark games, board for board, so their shots to finish can be compared directly.
 _Avoid_: Evaluation, tournament
 
+**Game**:
+A human and an AI, each with a complete board, firing at each other's board in turns until one board is game over. Unlike a benchmark game, it has two boards and a winner.
+_Avoid_: Match, duel, round
+
+**Turn**:
+One side's run of shots in a game. Every shot that strikes a ship (hit or sunk) earns another shot, so a turn ends at the first miss or at game over.
+_Avoid_: Move, round
+
+**First shooter**:
+The side that takes the first turn, chosen by an even coin flip once both boards are complete.
+_Avoid_: Starting player
+
+**Phase**:
+Where a game stands: **setup** while the human is still placing ships, **playing** once both boards are complete, and **over** once one board is game over.
+_Avoid_: State, status, stage
+
+**Winner**:
+The side, human or AI, that brought the other side's board to game over first.
+_Avoid_: Victor
+
 ## Rules of placement
 
 - A placement is legal when the ship lies fully on the board, does not overlap another ship, and its length is still needed by the fleet.

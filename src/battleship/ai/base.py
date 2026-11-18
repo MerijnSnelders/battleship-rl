@@ -8,6 +8,7 @@ player view it is handed, so it can never see where the opponent's ships are.
 """
 
 from abc import ABC, abstractmethod
+from typing import ClassVar
 
 import numpy as np
 
@@ -24,6 +25,17 @@ class AI(ABC):
     between shots of one game, override `new_game`, call `super().new_game(...)` and clear
     that state there.
     """
+
+    display_name: ClassVar[str] = ""
+    """How the AI is named to people, matching the glossary."""
+
+    description: ClassVar[str] = ""
+    """One sentence on how the AI picks its shots, shown in the opponent list."""
+
+    @classmethod
+    def has_heatmap(cls) -> bool:
+        """Whether this AI shows a heatmap, so the frontend knows to offer the toggle."""
+        return cls._heatmap is not AI._heatmap
 
     def __init__(self) -> None:
         self._config: GameConfig | None = None

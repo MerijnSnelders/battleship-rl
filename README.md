@@ -71,6 +71,7 @@ Training dependencies are optional: `uv sync --extra rl`.
 ## Documentation
 
 - [Plan](docs/plan.md): research question, scope and schedule
+- [Game API](docs/api.md): the HTTP API the frontend plays through
 - [Research notes](docs/research.md)
 - [Experiment log](docs/experiments.md)
 - [Advice](docs/advice.md): the answer to the research question

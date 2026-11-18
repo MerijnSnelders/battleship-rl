@@ -36,3 +36,6 @@ class GameConfig:
 
 STANDARD = GameConfig()
 SMALL = GameConfig(size=6, ships=(3, 2, 2))
+
+CONFIGS: dict[str, GameConfig] = {"standard": STANDARD, "small": SMALL}
+"""The configs a game or benchmark can be started with, by name."""
