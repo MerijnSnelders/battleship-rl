@@ -5,10 +5,12 @@ Used by the website, the heuristic AIs and RL training alike.
 
 from battleship.board import (
     Board,
+    FleetLockedError,
     GameOverError,
     IncompleteFleetError,
     InvalidPlacementError,
     InvalidShotError,
+    NoShipError,
     OffBoardError,
     OverlapError,
     PlacementFailedError,
@@ -23,11 +25,13 @@ from battleship.view import PlayerView, SquareState
 
 __all__ = [
     "Board",
+    "FleetLockedError",
     "GameConfig",
     "GameOverError",
     "IncompleteFleetError",
     "InvalidPlacementError",
     "InvalidShotError",
+    "NoShipError",
     "OffBoardError",
     "Orientation",
     "OverlapError",

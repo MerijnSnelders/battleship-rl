@@ -1,7 +1,7 @@
 import pytest
 from conftest import FirstUnknownAI, RandomWithHeatmapAI, every_ai, play
 
-from battleship.ai import AI, UnknownAIError, create, names, register
+from battleship.ai import AI, UnknownAIError, create, get, names, register
 from battleship.ai import registry as registry_module
 from battleship.board import Board, GameOverError
 from battleship.config import SMALL, STANDARD
@@ -143,3 +143,24 @@ def test_only_ai_subclasses_can_be_registered(clean_registry):
 
 def test_register_returns_the_class_unchanged(clean_registry):
     assert register("first_unknown")(FirstUnknownAI) is FirstUnknownAI
+
+
+def test_get_returns_the_registered_class(clean_registry):
+    register("first_unknown")(FirstUnknownAI)
+    assert get("first_unknown") is FirstUnknownAI
+    with pytest.raises(UnknownAIError):
+        get("nope")
+
+
+@pytest.mark.parametrize("name", names())
+def test_every_registered_ai_has_a_display_name_and_description(name):
+    cls = get(name)
+    assert cls.display_name
+    assert cls.description.endswith(".")
+
+
+def test_has_heatmap_follows_whether_the_ai_overrides_it():
+    assert not FirstUnknownAI.has_heatmap()
+    assert RandomWithHeatmapAI.has_heatmap()
+    assert not get("random").has_heatmap()
+    assert get("probability_density").has_heatmap()

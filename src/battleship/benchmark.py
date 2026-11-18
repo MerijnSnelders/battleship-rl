@@ -18,6 +18,7 @@ import os
 import subprocess
 import sys
 import time
+from collections import Counter
 from collections.abc import Iterable, Sequence
 from concurrent.futures import ProcessPoolExecutor
 from dataclasses import dataclass
@@ -27,15 +28,12 @@ from typing import Any
 
 import numpy as np
 
-from battleship.ai import create, names
+from battleship.ai import UnknownAIError, create, get, names
 from battleship.board import Board
-from battleship.config import SMALL, STANDARD, GameConfig
+from battleship.config import CONFIGS, GameConfig
 
 DEFAULT_GAMES = 10_000
 """How many benchmark games every AI plays unless told otherwise."""
-
-CONFIGS: dict[str, GameConfig] = {"standard": STANDARD, "small": SMALL}
-"""The configs the command line can benchmark, by name."""
 
 RESULTS_DIR = Path("results")
 """Where the command line writes its JSON and chart."""
@@ -43,13 +41,44 @@ RESULTS_DIR = Path("results")
 CHUNKS_PER_WORKER = 4
 """How many pieces each AI's games are split into per worker, to keep the workers busy."""
 
-DISPLAY_NAMES = {"hunt_target": "Hunt/target"}
-"""Chart labels that differ from the registry name with underscores turned into spaces."""
-
 
 def display_name(name: str) -> str:
-    """How an AI is named in the chart, matching the glossary."""
-    return DISPLAY_NAMES.get(name, name.replace("_", " ").capitalize())
+    """How an AI is named in charts and on the stats page, matching the glossary.
+
+    Results may hold an AI this install does not have (the RL agent without its model),
+    which keeps its registry name.
+    """
+    try:
+        return get(name).display_name
+    except UnknownAIError:
+        return name
+
+
+def results_path(config_name: str, directory: Path = RESULTS_DIR) -> Path:
+    """Where the benchmark results of a config live: benchmark.json for standard."""
+    stem = "benchmark" if config_name == "standard" else f"benchmark_{config_name}"
+    return directory / f"{stem}.json"
+
+
+def stats(data: dict[str, Any]) -> dict[str, Any]:
+    """Benchmark results made small for the stats page: summaries and histograms, no raw shots.
+
+    Each AI's histogram lists [shots to finish, number of games] for every shot count that
+    occurred, lowest first. AIs come out from fewest to most mean shots.
+    """
+    ais = []
+    for name, ai in sorted(data["ais"].items(), key=lambda item: item[1]["mean"]):
+        counts = Counter(ai["shots"])
+        ais.append(
+            {
+                "name": name,
+                "display_name": display_name(name),
+                "games": len(ai["shots"]),
+                **{key: ai[key] for key in ("mean", "median", "std", "ci95", "min", "max")},
+                "histogram": [[shots, counts[shots]] for shots in sorted(counts)],
+            }
+        )
+    return {"config": data["config"], "games": data["games"], "seed": data["seed"], "ais": ais}
 
 
 class BenchmarkMismatchError(ValueError):
@@ -263,8 +292,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     args = parser.parse_args(argv)
 
     config = CONFIGS[args.config]
-    stem = "benchmark" if args.config == "standard" else f"benchmark_{args.config}"
-    json_path, chart_path = args.out / f"{stem}.json", args.out / f"{stem}.png"
+    json_path = results_path(args.config, args.out)
+    chart_path = json_path.with_suffix(".png")
     existing = json.loads(json_path.read_text()) if json_path.exists() else None
     ai_names = args.ai or list(names())
     workers = args.workers or (os.cpu_count() or 1)

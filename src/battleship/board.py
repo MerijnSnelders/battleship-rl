@@ -31,6 +31,14 @@ class OverlapError(InvalidPlacementError):
     """The ship would cover a square that another ship already covers."""
 
 
+class NoShipError(InvalidPlacementError):
+    """No ship covers the square, so there is nothing to remove."""
+
+
+class FleetLockedError(InvalidPlacementError):
+    """Shots have been fired at the board, so its ships can no longer be moved."""
+
+
 class IncompleteFleetError(ValueError):
     """The ships given do not make up the whole fleet."""
 
@@ -103,6 +111,18 @@ class Board:
         return tuple(self._ships)
 
     @property
+    def unplaced(self) -> tuple[int, ...]:
+        """The lengths of the fleet's ships not placed yet, in fleet order."""
+        left = Counter(placed.length for placed in self._ships)
+        unplaced = []
+        for length in self.config.ships:
+            if left[length] > 0:
+                left[length] -= 1
+            else:
+                unplaced.append(length)
+        return tuple(unplaced)
+
+    @property
     def is_complete(self) -> bool:
         """Whether every ship of the fleet has been placed."""
         return len(self._ships) == len(self.config.ships)
@@ -172,9 +192,31 @@ class Board:
         self._check(ship)
         self._ships.append(ship)
 
+    def remove(self, square: Square) -> Ship:
+        """Take the ship covering `square` off the board and return it.
+
+        Raises NoShipError if no ship covers the square and FleetLockedError once a shot
+        has been fired at the board. Nothing changes when it raises.
+        """
+        if self._shots:
+            raise FleetLockedError("ships cannot be moved once shots have been fired")
+        square = (int(square[0]), int(square[1]))
+        ship = next((ship for ship in self._ships if square in ship.squares), None)
+        if ship is None:
+            raise NoShipError(f"no ship covers square {square}")
+        self._ships.remove(ship)
+        return ship
+
+    def clear(self) -> None:
+        """Take every ship off the board, or raise FleetLockedError once shots were fired."""
+        if self._shots:
+            raise FleetLockedError("ships cannot be moved once shots have been fired")
+        self._ships.clear()
+
     def _check(self, ship: Ship) -> None:
-        unplaced = Counter(self.config.ships) - Counter(placed.length for placed in self._ships)
-        if unplaced[ship.length] == 0:
+        if self._shots:
+            raise FleetLockedError("ships cannot be moved once shots have been fired")
+        if ship.length not in self.unplaced:
             raise ShipNotInFleetError(
                 f"the fleet has no ship of length {ship.length} left to place"
             )

@@ -14,6 +14,9 @@ class RandomAI(AI):
     shot depends only on the view and the game's random generator.
     """
 
+    display_name = "Random"
+    description = "Fires at any square not fired at yet, ignoring every hit."
+
     def _choose_shot(self, view: PlayerView) -> Square:
         squares = self.unknown_squares(view)
         return squares[int(self.rng.integers(len(squares)))]

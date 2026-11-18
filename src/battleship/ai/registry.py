@@ -28,14 +28,18 @@ def register[T: type[AI]](name: str) -> Callable[[T], T]:
     return decorator
 
 
-def create(name: str) -> AI:
-    """A fresh AI of the given name. Call `new_game` on it before the first shot."""
+def get(name: str) -> type[AI]:
+    """The AI class registered under `name`, for its display name, description and heatmap."""
     try:
-        cls = _REGISTRY[name]
+        return _REGISTRY[name]
     except KeyError:
         known = ", ".join(_REGISTRY) or "none"
         raise UnknownAIError(f"no AI named {name!r} (registered: {known})") from None
-    return cls()
+
+
+def create(name: str) -> AI:
+    """A fresh AI of the given name. Call `new_game` on it before the first shot."""
+    return get(name)()
 
 
 def names() -> tuple[str, ...]:

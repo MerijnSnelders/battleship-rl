@@ -38,6 +38,12 @@ class MonteCarloAI(AI):
     apart from a cache of the last heatmap.
     """
 
+    display_name = "Monte Carlo"
+    description = (
+        "Draws many possible layouts of the ships still afloat and fires where a ship lies "
+        "most often."
+    )
+
     def __init__(self, samples: int = DEFAULT_SAMPLES) -> None:
         super().__init__()
         if samples < 1:

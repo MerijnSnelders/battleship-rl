@@ -6,11 +6,14 @@ import pytest
 from battleship.ai import UnknownAIError, names
 from battleship.benchmark import (
     BenchmarkMismatchError,
+    display_name,
     dumps,
     game_seeds,
     main,
     play_games,
+    results_path,
     run_benchmark,
+    stats,
     to_json,
 )
 from battleship.board import Board
@@ -134,3 +137,38 @@ def test_ais_rank_as_expected():
     results = run_benchmark(["random", "hunt_target", "probability_density"], STANDARD, 200, 0, 4)
     means = {name: result.mean for name, result in results.items()}
     assert means["random"] > means["hunt_target"] > means["probability_density"]
+
+
+def test_display_names_come_from_the_ai_and_fall_back_to_the_name():
+    assert display_name("hunt_target") == "Hunt/target"
+    assert display_name("rl_agent") == "rl_agent"
+
+
+def test_results_path_names_the_standard_file_without_a_suffix(tmp_path):
+    assert results_path("standard", tmp_path) == tmp_path / "benchmark.json"
+    assert results_path("small", tmp_path) == tmp_path / "benchmark_small.json"
+
+
+def test_stats_keep_summaries_and_histograms_but_drop_raw_shots():
+    results = run_benchmark(["random", "hunt_target"], SMALL, games=8, seed=4)
+    data = to_json(results, SMALL, 8, 4)
+
+    summary = stats(data)
+
+    assert (summary["config"], summary["games"], summary["seed"]) == (data["config"], 8, 4)
+    means = [ai["mean"] for ai in summary["ais"]]
+    assert means == sorted(means)
+    for ai in summary["ais"]:
+        assert "shots" not in ai
+        assert ai["display_name"] == display_name(ai["name"])
+        assert ai["games"] == 8
+        assert sum(count for _, count in ai["histogram"]) == 8
+        counted = [shots for shots, _ in ai["histogram"]]
+        assert counted == sorted(counted)
+        assert (counted[0], counted[-1]) == (ai["min"], ai["max"])
+        assert ai["mean"] == data["ais"][ai["name"]]["mean"]
+
+
+def test_stats_of_the_published_results_are_small():
+    data = json.loads(results_path("standard").read_text())
+    assert len(json.dumps(stats(data))) < 20_000

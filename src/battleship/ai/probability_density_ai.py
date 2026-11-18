@@ -28,6 +28,9 @@ class ProbabilityDensityAI(AI):
     Ties for the highest count are broken at random. It keeps no state between shots.
     """
 
+    display_name = "Probability density"
+    description = "Fires where the ships still afloat fit in the most ways."
+
     def _choose_shot(self, view: PlayerView) -> Square:
         counts = self.placement_counts(view)
         best = counts.max()
