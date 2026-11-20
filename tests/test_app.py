@@ -378,3 +378,36 @@ def test_stats_refuse_an_unknown_config_or_missing_results(client, tmp_path):
 
     empty = TestClient(create_app(GameStore(), results_dir=tmp_path))
     assert_error(empty.get("/api/stats"), 404, "no_stats")
+
+
+@config_names
+def test_setup_lists_the_legal_starts_of_every_length_still_to_place(client, config):
+    game = new_game(client, config=config)
+    lengths = list(dict.fromkeys(CONFIGS[config].ships))
+    size = CONFIGS[config].size
+
+    legal = game["human_board"]["legal_starts"]
+
+    assert [item["length"] for item in legal] == lengths
+    longest = legal[0]
+    assert len(longest["horizontal"]) == size * (size - lengths[0] + 1)
+    assert [0, size - lengths[0] + 1] not in longest["horizontal"]
+    assert [size - lengths[0] + 1, 0] not in longest["vertical"]
+
+
+def test_legal_starts_follow_the_ships_placed_and_vanish_after_setup(client):
+    game = new_game(client, config="small")
+    body = {"start": [0, 0], "length": 3, "orientation": "horizontal"}
+    state = client.post(f"/api/games/{game['id']}/ships", json=body).json()
+
+    legal = state["human_board"]["legal_starts"]
+    assert [item["length"] for item in legal] == [2]
+    assert [0, 1] not in legal[0]["horizontal"]
+    assert [0, 0] not in legal[0]["vertical"]
+    assert [1, 0] in legal[0]["vertical"]
+
+    client.post(f"/api/games/{game['id']}/ships/random")
+    full = client.get(f"/api/games/{game['id']}").json()
+    assert full["human_board"]["legal_starts"] == []
+    started_state = client.post(f"/api/games/{game['id']}/start").json()["state"]
+    assert started_state["human_board"]["legal_starts"] is None

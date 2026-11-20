@@ -9,7 +9,7 @@ from typing import Any
 import numpy as np
 
 from battleship.game import AIShot, Game, Phase
-from battleship.ship import Ship
+from battleship.ship import Orientation, Ship
 from battleship.shot import ShotResult
 
 HEATMAP_DECIMALS = 4
@@ -47,6 +47,21 @@ def ai_turn(shots: tuple[AIShot, ...]) -> list[dict[str, Any]]:
     return [{**shot(item.result), "heatmap": heatmap(item.heatmap)} for item in shots]
 
 
+def legal_starts(game: Game) -> list[dict[str, Any]]:
+    """For each length still to place, the start squares of its legal placements.
+
+    The frontend looks placements up here instead of knowing the placement rules itself.
+    """
+    board = game.human_board
+    result = []
+    for length in dict.fromkeys(board.unplaced):
+        starts: dict[str, list[list[int]]] = {item.value: [] for item in Orientation}
+        for placement in board.legal_placements(length):
+            starts[placement.orientation.value].append(list(placement.start))
+        result.append({"length": length, **starts})
+    return result
+
+
 def state(game_id: str, opponent: str, game: Game) -> dict[str, Any]:
     """Everything the human may know about a game, enough to draw it after a page reload."""
     over = game.phase is Phase.OVER
@@ -62,6 +77,7 @@ def state(game_id: str, opponent: str, game: Game) -> dict[str, Any]:
         "human_board": {
             "ships": [ship(item) for item in game.human_board.ships],
             "unplaced": list(game.human_board.unplaced),
+            "legal_starts": legal_starts(game) if game.phase is Phase.SETUP else None,
             "view": game.human_board.view().to_dict(),
         },
         "ai_board": {

@@ -1,30 +1,1229 @@
+/* Blueprint theme: navy paper, gray line work, red as the one accent. Always navy. */
+
 :root {
-  --bg: #f7f8fa;
-  --text: #1c2430;
-  --muted: #5b6675;
+  --navy-950: #081627;
+  --navy-900: #0b1d33;
+  --navy-850: #0e2440;
+  --navy-800: #112a4b;
+  --navy-700: #183863;
+  --line: #c6d0dc;
+  --line-strong: #eef2f7;
+  --line-dim: rgba(198, 208, 220, 0.28);
+  --grid-fine: rgba(160, 182, 208, 0.07);
+  --grid-major: rgba(160, 182, 208, 0.13);
+  --muted: #8797ab;
+  --text: #dfe5ec;
+  --red: #e3483c;
+  --red-deep: #a8291f;
+  --red-soft: rgba(227, 72, 60, 0.2);
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif-condensed, sans-serif;
+  --sq: 40px;
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #12161c;
-    --text: #e6e9ee;
-    --muted: #9aa4b2;
-  }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html {
+  background: var(--navy-900);
 }
 
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
-  background: var(--bg);
+  min-height: 100vh;
+  font-family: var(--font-mono);
+  font-size: 14px;
   color: var(--text);
+  background-color: var(--navy-900);
+  background-image:
+    linear-gradient(var(--grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+    linear-gradient(var(--grid-fine) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-fine) 1px, transparent 1px);
+  background-size: 120px 120px, 120px 120px, 24px 24px, 24px 24px;
+  background-attachment: fixed;
+  -webkit-tap-highlight-color: transparent;
 }
 
-main {
-  max-width: 720px;
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+
+kbd {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  padding: 0 5px;
+  border: 1px solid var(--line-dim);
+  border-radius: 3px;
+}
+
+/* ---------- Screens ---------- */
+
+.screen {
+  display: none;
+}
+
+body[data-screen="title"] #title-screen,
+body[data-screen="game"] #game-screen {
+  display: block;
+}
+
+/* ---------- Title screen ---------- */
+
+#title-screen {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.title-sheet {
+  position: relative;
+  max-width: 1040px;
+  min-height: 100vh;
   margin: 0 auto;
-  padding: 48px 16px;
+  padding: 40px 16px 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
 }
 
-.muted {
+.sheet-label {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
   color: var(--muted);
+}
+
+.title {
+  margin: 10px 0 6px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(52px, 10vw, 104px);
+  line-height: 0.95;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--line-strong);
+}
+
+.title-accent {
+  color: var(--red);
+}
+
+.tagline {
+  max-width: 34em;
+  margin: 0 0 12px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.blueprint {
+  width: 100%;
+  max-width: 920px;
+  margin: 8px 0 10px;
+}
+
+.blueprint-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.blueprint-svg * {
+  vector-effect: non-scaling-stroke;
+}
+
+.bp-hull,
+.bp-part,
+.bp-thin,
+.bp-water {
+  fill: none;
+  stroke: var(--line);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.bp-hull {
+  stroke-width: 2;
+  fill: rgba(198, 208, 220, 0.04);
+}
+
+.bp-part {
+  stroke-width: 1.5;
+}
+
+.bp-thin {
+  stroke-width: 1;
+  opacity: 0.6;
+}
+
+.bp-water {
+  stroke-width: 1;
+  stroke-dasharray: 10 6;
+  opacity: 0.5;
+}
+
+.bp-dim line {
+  stroke: var(--muted);
+  stroke-width: 1;
+}
+
+.bp-dim text {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  fill: var(--muted);
+}
+
+.bp-dim .bp-caption {
+  font-size: 11px;
+  letter-spacing: 0.22em;
+}
+
+.bp-arrow {
+  fill: var(--muted);
+}
+
+.bp-draw [pathLength] {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw 1.6s ease-out forwards;
+}
+
+.bp-draw [pathLength]:nth-child(3n) {
+  animation-delay: 0.15s;
+}
+
+.bp-draw [pathLength]:nth-child(3n + 1) {
+  animation-delay: 0.3s;
+}
+
+.bp-dim {
+  animation: fade-in 0.8s 1s ease-out both;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* The PLAY button is a red shell, nose up, ready to fire. */
+
+.shell-button {
+  position: relative;
+  margin-top: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.shell-button:hover {
+  transform: translateY(-5px);
+}
+
+.shell-button:active {
+  transform: translateY(-2px) scale(0.98);
+}
+
+.shell {
+  display: block;
+  width: 88px;
+  height: auto;
+  filter: drop-shadow(0 0 18px rgba(227, 72, 60, 0.35));
+  transition: filter 0.2s ease;
+}
+
+.shell-button:hover .shell {
+  filter: drop-shadow(0 0 28px rgba(227, 72, 60, 0.6));
+}
+
+.shell-body {
+  fill: var(--red);
+}
+
+.shell-band {
+  fill: var(--red-deep);
+}
+
+.shell-base {
+  fill: #c6392e;
+  stroke: var(--red-deep);
+  stroke-width: 2;
+}
+
+.shell-text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 25px;
+  letter-spacing: 0.08em;
+  fill: var(--navy-900);
+}
+
+.shell-trail {
+  position: absolute;
+  left: 50%;
+  top: 100%;
+  width: 6px;
+  height: 0;
+  transform: translateX(-50%);
+  background: linear-gradient(var(--red), transparent);
+  border-radius: 3px;
+  opacity: 0;
+}
+
+.firing .shell-button {
+  animation: launch 0.65s cubic-bezier(0.55, 0, 0.9, 0.4) forwards;
+}
+
+.firing .shell-trail {
+  animation: trail 0.65s ease-in forwards;
+}
+
+.firing .title-sheet {
+  animation: fade-out 0.4s 0.5s ease-in forwards;
+}
+
+.impact-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 60px;
+  height: 60px;
+  margin: -30px 0 0 -30px;
+  border: 3px solid var(--red);
+  border-radius: 50%;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.firing .impact-ring {
+  animation: ripple 0.6s 0.4s ease-out forwards;
+}
+
+@keyframes launch {
+  0% {
+    transform: translateY(0);
+  }
+  15% {
+    transform: translateY(8px);
+  }
+  100% {
+    transform: translateY(-120vh);
+  }
+}
+
+@keyframes trail {
+  0% {
+    opacity: 0;
+    height: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.8;
+    height: 70vh;
+  }
+}
+
+@keyframes ripple {
+  0% {
+    opacity: 0.9;
+    transform: scale(0.2);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(14);
+  }
+}
+
+@keyframes fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+.title-block {
+  position: absolute;
+  right: 16px;
+  bottom: 20px;
+  display: grid;
+  grid-template-columns: auto auto;
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border: 1px solid var(--line-dim);
+  text-align: left;
+}
+
+.title-block span {
+  padding: 4px 10px;
+  border-bottom: 1px solid var(--line-dim);
+}
+
+.title-block span:nth-child(odd) {
+  border-right: 1px solid var(--line-dim);
+}
+
+.title-block span:nth-last-child(-n + 2) {
+  border-bottom: 0;
+}
+
+/* ---------- Game screen ---------- */
+
+#game-screen {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 0 16px 40px;
+  animation: fade-in 0.4s ease-out;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--line-dim);
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.opponent-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--muted);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.status {
+  min-height: 1.5em;
+  margin: 18px 0 14px;
+  text-align: center;
+  font-size: 15px;
+  color: var(--line-strong);
+}
+
+.status[data-tone="alert"] {
+  color: var(--red);
+}
+
+.boards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+
+.side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  transition: opacity 0.3s ease;
+}
+
+.side-title {
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 10px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.side-title::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line-dim);
+}
+
+body[data-phase="setup"] .enemy {
+  opacity: 0.45;
+}
+
+body[data-phase="setup"] .enemy .side-title::before {
+  content: "Awaiting battle /";
+  color: var(--muted);
+  opacity: 0.8;
+}
+
+/* A board inside its frame of column letters and row numbers. */
+
+.board-frame {
+  --label: 22px;
+  width: min(100%, 480px);
+  display: grid;
+  grid-template-columns: var(--label) 1fr;
+  grid-template-rows: var(--label) auto;
+}
+
+.labels {
+  display: grid;
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.labels.cols {
+  grid-column: 2;
+  grid-template-columns: repeat(var(--n, 10), 1fr);
+  align-items: center;
+}
+
+.labels.rows {
+  grid-row: 2;
+  grid-template-rows: repeat(var(--n, 10), 1fr);
+  align-items: center;
+}
+
+.board {
+  grid-column: 2;
+  grid-row: 2;
+  position: relative;
+  aspect-ratio: 1;
+  display: grid;
+  grid-template-columns: repeat(var(--n, 10), 1fr);
+  grid-template-rows: repeat(var(--n, 10), 1fr);
+  border: 1.5px solid var(--line);
+  background: rgba(14, 36, 64, 0.75);
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.square {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  border-right: 1px solid var(--line-dim);
+  border-bottom: 1px solid var(--line-dim);
+  background: transparent;
+  cursor: default;
+  transition: background-color 0.15s ease;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+/* Firing at enemy waters. */
+
+body[data-phase="playing"] .enemy .square[data-state="unknown"] {
+  cursor: crosshair;
+}
+
+body[data-phase="playing"] .enemy .square[data-state="unknown"]:hover {
+  background: var(--red-soft);
+  box-shadow: inset 0 0 0 1.5px var(--red);
+}
+
+body.ai-turn .enemy,
+body.busy .enemy {
+  pointer-events: none;
+}
+
+body.ai-turn .enemy {
+  opacity: 0.6;
+}
+
+body.ai-turn .own .board {
+  box-shadow: 0 0 0 3px var(--red-soft);
+}
+
+/* ---------- Ships ---------- */
+
+.ship {
+  position: absolute;
+  padding: 1px;
+  transition:
+    left 0.09s ease-out,
+    top 0.09s ease-out;
+}
+
+.hull {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.hull * {
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.hull-shape {
+  fill: rgba(198, 208, 220, 0.13);
+  stroke: var(--line);
+  stroke-width: 1.6;
+}
+
+.keel {
+  stroke: var(--line);
+  stroke-width: 1;
+  stroke-dasharray: 5 4;
+  opacity: 0.45;
+}
+
+.deck,
+.detail,
+.funnel,
+.turret {
+  fill: rgba(11, 29, 51, 0.8);
+  stroke: var(--line);
+  stroke-width: 1.2;
+}
+
+.detail {
+  fill: none;
+  opacity: 0.7;
+}
+
+.barrel {
+  stroke: var(--line);
+  stroke-width: 1.6;
+}
+
+.ship.placed {
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+}
+
+.ship.placed:hover .hull-shape {
+  stroke: var(--line-strong);
+  fill: rgba(238, 242, 247, 0.2);
+}
+
+.ship.lifting {
+  opacity: 0.2;
+}
+
+.ship.preview {
+  pointer-events: none;
+}
+
+.ship.preview .hull * {
+  stroke-dasharray: 4 3;
+}
+
+.ship.preview.legal .hull-shape {
+  fill: rgba(238, 242, 247, 0.16);
+  stroke: var(--line-strong);
+}
+
+.ship.preview.illegal .hull-shape,
+.ship.preview.illegal .hull * {
+  stroke: var(--red);
+}
+
+.ship.preview.illegal .hull-shape {
+  fill: var(--red-soft);
+}
+
+.ship.sunk .hull-shape {
+  fill: var(--red-soft);
+  stroke: var(--red);
+}
+
+.ship.sunk .hull :not(.hull-shape) {
+  stroke: var(--red);
+  opacity: 0.8;
+}
+
+.ship.sinking {
+  animation: sinking 0.9s ease-out;
+}
+
+.ship.revealed .hull * {
+  stroke: var(--muted);
+  stroke-dasharray: 4 4;
+}
+
+.ship.revealed .hull-shape {
+  fill: none;
+}
+
+.ship.shake {
+  animation: shake 0.35s ease;
+}
+
+@keyframes sinking {
+  0% {
+    filter: drop-shadow(0 0 0 var(--red));
+  }
+  30% {
+    filter: drop-shadow(0 0 10px var(--red));
+  }
+  100% {
+    filter: none;
+  }
+}
+
+@keyframes shake {
+  20%,
+  60% {
+    translate: -4px 0;
+  }
+  40%,
+  80% {
+    translate: 4px 0;
+  }
+}
+
+/* The ship following the pointer while dragging. */
+
+.drag-ghost {
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 50;
+  pointer-events: none;
+  opacity: 0.9;
+  filter: drop-shadow(0 8px 14px rgba(0, 0, 0, 0.45));
+}
+
+.drag-ghost .hull-shape {
+  fill: rgba(24, 56, 99, 0.92);
+  stroke: var(--line-strong);
+}
+
+body.dragging,
+body.dragging * {
+  cursor: grabbing !important;
+}
+
+/* ---------- Shot marks ---------- */
+
+.mark {
+  position: absolute;
+}
+
+.mark.miss::after {
+  content: "";
+  position: absolute;
+  inset: 37%;
+  border-radius: 50%;
+  border: 2px solid var(--muted);
+}
+
+.mark.miss.fresh::before {
+  content: "";
+  position: absolute;
+  inset: 37%;
+  border-radius: 50%;
+  border: 1.5px solid var(--line);
+  animation: ripple-small 0.7s ease-out forwards;
+}
+
+.mark.hit::before,
+.mark.hit::after,
+.mark.sunk::before,
+.mark.sunk::after {
+  content: "";
+  position: absolute;
+  left: 22%;
+  right: 22%;
+  top: calc(50% - 1.5px);
+  height: 3px;
+  border-radius: 2px;
+  background: var(--red);
+  transform: rotate(45deg);
+}
+
+.mark.hit::after,
+.mark.sunk::after {
+  transform: rotate(-45deg);
+}
+
+.mark.sunk {
+  background: rgba(227, 72, 60, 0.12);
+}
+
+.mark.fresh.hit,
+.mark.fresh.sunk {
+  animation: flash 0.6s ease-out;
+}
+
+.mark.fresh.hit::before,
+.mark.fresh.hit::after,
+.mark.fresh.sunk::before,
+.mark.fresh.sunk::after {
+  animation: pop 0.3s ease-out;
+}
+
+@keyframes ripple-small {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(3.2);
+  }
+}
+
+@keyframes flash {
+  from {
+    background: rgba(227, 72, 60, 0.65);
+    box-shadow: 0 0 18px 4px rgba(227, 72, 60, 0.5);
+  }
+}
+
+@keyframes pop {
+  from {
+    scale: 0.2;
+  }
+}
+
+/* ---------- Fleet status under each board ---------- */
+
+.fleet-status {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px 12px;
+  min-height: 16px;
+  margin-top: 12px;
+}
+
+.fleet-ship {
+  display: block;
+  width: calc(var(--len) * 13px);
+  height: 13px;
+}
+
+.fleet-ship.sunk .hull-shape {
+  fill: var(--red-soft);
+  stroke: var(--red);
+}
+
+.fleet-ship.sunk .hull :not(.hull-shape) {
+  stroke: var(--red);
+}
+
+.fleet-ship.sunk {
+  opacity: 0.75;
+}
+
+body[data-phase="setup"] .fleet-status {
+  display: none;
+}
+
+/* ---------- Setup panel ---------- */
+
+.panel {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 32px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line-dim);
+}
+
+body:not([data-phase="setup"]) .panel {
+  display: none;
+}
+
+.panel-block {
+  min-width: 0;
+}
+
+.panel-title {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.hint {
+  margin: 0 0 14px;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+
+.dock {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 16px;
+  min-height: calc(var(--sq) + 4px);
+  margin-bottom: 16px;
+}
+
+.dock-ship {
+  position: relative;
+  width: calc(var(--len) * var(--sq));
+  height: var(--sq);
+  padding: 0;
+  border: 1px dashed var(--line-dim);
+  border-radius: 3px;
+  background: transparent;
+  cursor: grab;
+  touch-action: none;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.dock-ship:hover {
+  border-color: var(--line);
+}
+
+.dock-ship.selected {
+  border: 1px solid var(--red);
+  box-shadow: 0 0 0 3px var(--red-soft);
+}
+
+.dock-ship.lifting {
+  opacity: 0.3;
+}
+
+.dock-hull {
+  position: absolute;
+  inset: 1px;
+  pointer-events: none;
+}
+
+.dock-length {
+  position: absolute;
+  top: -9px;
+  left: 6px;
+  padding: 0 4px;
+  font-size: 10px;
+  line-height: 16px;
+  color: var(--muted);
+  background: var(--navy-900);
+  pointer-events: none;
+}
+
+.dock-ship.selected .dock-length {
+  color: var(--red);
+}
+
+.dock-empty {
+  margin: 0;
+  align-self: center;
+  color: var(--line-strong);
+}
+
+.tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tool-note {
+  color: var(--muted);
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 11px;
+}
+
+.opponents {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.opponent {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding: 10px 14px;
+  border: 1px solid var(--line-dim);
+  border-left: 3px solid var(--line-dim);
+  border-radius: 3px;
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.opponent:hover {
+  border-color: var(--line);
+}
+
+.opponent input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.opponent:has(input:focus-visible) {
+  outline: 2px solid var(--red);
+  outline-offset: 2px;
+}
+
+.opponent.chosen {
+  border-color: var(--line);
+  border-left-color: var(--red);
+  background: rgba(227, 72, 60, 0.08);
+}
+
+.opponent-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 19px;
+  letter-spacing: 0.04em;
+  color: var(--line-strong);
+}
+
+.opponent-text {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--muted);
+}
+
+/* ---------- Buttons ---------- */
+
+.button {
+  padding: 10px 16px;
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  background: transparent;
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    transform 0.1s ease;
+}
+
+.button:hover:not(:disabled) {
+  background: rgba(238, 242, 247, 0.08);
+  border-color: var(--line-strong);
+}
+
+.button:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.button:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+}
+
+.button.small {
+  padding: 6px 12px;
+  font-size: 11px;
+}
+
+.button.primary {
+  width: 100%;
+  padding: 14px 18px;
+  border-color: var(--red);
+  background: var(--red);
+  color: #fff;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.button.primary:hover:not(:disabled) {
+  background: #ee5649;
+  border-color: #ee5649;
+}
+
+body.busy .board,
+body.busy .button {
+  cursor: progress;
+}
+
+/* ---------- Result panel ---------- */
+
+.result {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(8, 22, 39, 0.72);
+  backdrop-filter: blur(3px);
+  animation: fade-in 0.3s ease-out;
+}
+
+.result-card {
+  width: min(100%, 440px);
+  padding: 28px 24px 24px;
+  border: 1px solid var(--line);
+  background: var(--navy-850);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+  text-align: center;
+}
+
+.result-title {
+  margin: 8px 0 20px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 38px;
+  line-height: 1;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--line-strong);
+}
+
+.result-title[data-won="false"] {
+  color: var(--red);
+}
+
+.result-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin: 0 0 22px;
+  border: 1px solid var(--line-dim);
+}
+
+.result-stats div {
+  padding: 10px 6px;
+}
+
+.result-stats div + div {
+  border-left: 1px solid var(--line-dim);
+}
+
+.result-stats dt {
+  font-size: 10.5px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.result-stats dd {
+  margin: 4px 0 0;
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 32px;
+  color: var(--line-strong);
+}
+
+.result-actions {
+  display: grid;
+  gap: 10px;
+}
+
+/* ---------- Phones ---------- */
+
+@media (max-width: 760px) {
+  body {
+    font-size: 13px;
+  }
+
+  .boards {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .board-frame {
+    --label: 16px;
+  }
+
+  .labels {
+    font-size: 9px;
+  }
+
+  /* Enemy waters always on top: small and empty during setup, large once firing. */
+  .enemy {
+    order: -1;
+  }
+
+  body[data-phase="setup"] .enemy .board-frame {
+    width: 40%;
+  }
+
+  /* Playing: enemy waters large on top, your board smaller below. */
+  body:not([data-phase="setup"]) .own .board-frame {
+    width: 62%;
+  }
+
+  .panel {
+    grid-template-columns: 1fr;
+    gap: 24px;
+    margin-top: 18px;
+  }
+
+  .topbar {
+    gap: 10px;
+  }
+
+  .brand {
+    font-size: 19px;
+  }
+
+  .status {
+    margin: 12px 0 10px;
+    font-size: 14px;
+  }
+
+  .title-sheet {
+    padding-top: 28px;
+  }
+
+  .title-block {
+    display: none;
+  }
+
+  .result-title {
+    font-size: 32px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+  }
 }

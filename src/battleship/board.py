@@ -187,6 +187,21 @@ class Board:
             return False
         return True
 
+    def legal_placements(self, length: int) -> tuple[Ship, ...]:
+        """Every ship of this length that `place` would accept right now.
+
+        Empty when the fleet needs no more ships of this length or shots have been fired.
+        Ordered by orientation (horizontal first), then by start square row by row.
+        """
+        size = self.config.size
+        candidates = (
+            Ship(start=(row, col), length=length, orientation=orientation)
+            for orientation in Orientation
+            for row in range(size)
+            for col in range(size)
+        )
+        return tuple(ship for ship in candidates if self.can_place(ship))
+
     def place(self, ship: Ship) -> None:
         """Put a ship on the board, or raise InvalidPlacementError and change nothing."""
         self._check(ship)

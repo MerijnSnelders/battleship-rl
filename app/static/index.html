@@ -3,14 +3,109 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1d33">
   <title>battleship-rl</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
   <link rel="stylesheet" href="/static/style.css">
+  <script type="module" src="/static/main.js"></script>
 </head>
-<body>
-  <main>
-    <h1>battleship-rl</h1>
-    <p>Play Battleship against heuristic AIs and a self-trained reinforcement learning agent.</p>
-    <p class="muted">Coming soon. The game board arrives in milestone M3.</p>
-  </main>
+<body data-screen="loading">
+  <!-- Title screen: the blueprint and the PLAY shell. -->
+  <section id="title-screen" class="screen" aria-labelledby="title-heading">
+    <div class="title-sheet">
+      <p class="sheet-label">Drawing no. RL-01 &middot; General arrangement</p>
+      <h1 id="title-heading" class="title">Battleship<span class="title-accent">-RL</span></h1>
+      <p class="tagline">Sink a heuristic AI, or the reinforcement learning agent trained to beat it.</p>
+      <div id="blueprint" class="blueprint" aria-hidden="true"></div>
+      <button id="play-button" class="shell-button" type="button" aria-label="Play">
+        <span class="shell-trail" aria-hidden="true"></span>
+        <svg class="shell" viewBox="0 0 100 180" aria-hidden="true">
+          <path class="shell-body" d="M50 4 C70 22 82 52 82 78 L82 150 L18 150 L18 78 C18 52 30 22 50 4 Z"/>
+          <rect class="shell-band" x="18" y="124" width="64" height="10"/>
+          <rect class="shell-base" x="14" y="150" width="72" height="18" rx="3"/>
+          <text class="shell-text" x="50" y="104" text-anchor="middle">PLAY</text>
+        </svg>
+      </button>
+      <div class="title-block" aria-hidden="true">
+        <span>Scale</span><span>1 : 1 square</span>
+        <span>Sheet</span><span>1 of 1</span>
+        <span>Drawn</span><span>RL agent</span>
+      </div>
+    </div>
+    <div class="impact-ring" aria-hidden="true"></div>
+  </section>
+
+  <!-- The game: header, status line, two boards and the panel below them. -->
+  <section id="game-screen" class="screen" aria-label="Game">
+    <header class="topbar">
+      <span class="brand">Battleship<span class="title-accent">-RL</span></span>
+      <span id="opponent-label" class="opponent-label"></span>
+      <button id="new-game-button" class="button ghost small" type="button">New game</button>
+    </header>
+
+    <p id="status" class="status" role="status" aria-live="polite"></p>
+
+    <div class="boards">
+      <section id="own-side" class="side own" aria-label="Your board">
+        <h2 class="side-title">Your fleet</h2>
+        <div class="board-frame">
+          <div class="labels cols" aria-hidden="true"></div>
+          <div class="labels rows" aria-hidden="true"></div>
+          <div id="own-board" class="board"></div>
+        </div>
+        <div id="own-fleet" class="fleet-status" aria-label="Your ships"></div>
+      </section>
+
+      <section id="enemy-side" class="side enemy" aria-label="Enemy board">
+        <h2 class="side-title">Enemy waters</h2>
+        <div class="board-frame">
+          <div class="labels cols" aria-hidden="true"></div>
+          <div class="labels rows" aria-hidden="true"></div>
+          <div id="enemy-board" class="board"></div>
+        </div>
+        <div id="enemy-fleet" class="fleet-status" aria-label="Enemy ships"></div>
+      </section>
+    </div>
+
+    <!-- Setup panel: dock, placement tools, opponent and start. -->
+    <section id="setup-panel" class="panel" aria-label="Fleet setup">
+      <div class="panel-block">
+        <h3 class="panel-title">Dock</h3>
+        <p class="hint">Drag a ship onto your board, or tap it and then a square. <kbd>R</kbd> or right-click rotates.</p>
+        <div id="dock" class="dock"></div>
+        <div class="tools">
+          <button id="rotate-button" class="button ghost" type="button">Rotate <span id="orientation-label" class="tool-note">horizontal</span></button>
+          <button id="random-button" class="button ghost" type="button">Random</button>
+          <button id="clear-button" class="button ghost" type="button">Clear</button>
+        </div>
+      </div>
+      <div class="panel-block">
+        <h3 class="panel-title">Opponent</h3>
+        <div id="opponents" class="opponents" role="radiogroup" aria-label="Opponent"></div>
+        <button id="start-button" class="button primary" type="button" disabled>Start battle</button>
+      </div>
+    </section>
+
+    <!-- Result panel over the boards once the game is over. -->
+    <div id="result" class="result" hidden>
+      <div class="result-card" role="dialog" aria-modal="true" aria-labelledby="result-title">
+        <p class="sheet-label">Battle report</p>
+        <h2 id="result-title" class="result-title"></h2>
+        <dl class="result-stats">
+          <div><dt>Your shots</dt><dd id="stat-shots"></dd></div>
+          <div><dt>Your accuracy</dt><dd id="stat-accuracy"></dd></div>
+          <div><dt>AI shots</dt><dd id="stat-ai-shots"></dd></div>
+        </dl>
+        <div class="result-actions">
+          <button id="result-new-game" class="button primary" type="button">New game</button>
+          <button id="result-close" class="button ghost" type="button">View boards</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div id="ghost" class="drag-ghost" hidden aria-hidden="true"></div>
 </body>
 </html>
