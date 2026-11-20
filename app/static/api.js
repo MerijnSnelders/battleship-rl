@@ -31,6 +31,7 @@ const game = (id) => `/api/games/${encodeURIComponent(id)}`;
 
 export const api = {
   opponents: () => request("GET", "/api/opponents"),
+  stats: (config) => request("GET", `/api/stats?config=${encodeURIComponent(config)}`),
   newGame: (opponent, config) => request("POST", "/api/games", { opponent, config }),
   getGame: (id) => request("GET", game(id)),
   place: (id, start, length, orientation) =>

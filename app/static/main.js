@@ -4,6 +4,7 @@
 
 import { api, ApiError } from "./api.js";
 import { blueprintSvg, hullSvg } from "./ships.js";
+import { isMuted, playShot, setMuted, unlock } from "./sound.js";
 
 const STORAGE_KEY = "battleship-rl:game";
 const DEFAULT_OPPONENT = "hunt_target";
@@ -41,6 +42,16 @@ const els = {
   statAccuracy: $("stat-accuracy"),
   statAiShots: $("stat-ai-shots"),
   ghost: $("ghost"),
+  home: $("home-button"),
+  sound: $("sound-button"),
+  resumeNote: $("resume-note"),
+  challenge: $("challenge"),
+  stepIconPlace: $("step-icon-place"),
+  stepTextPlace: $("step-text-place"),
+  stepTextOpponents: $("step-text-opponents"),
+  factBoard: $("fact-board"),
+  factFleet: $("fact-fleet"),
+  factOpponents: $("fact-opponents"),
 };
 
 const configName = new URLSearchParams(location.search).get("config") ?? "standard";
@@ -646,6 +657,7 @@ async function fire(row, col) {
     ownOverride = structuredClone(before);
     render();
     const { outcome, sunk_ship: sunkShip } = result.shot;
+    playShot(outcome);
     if (outcome === "sunk") setStatus(`You sank a ${sunkShip.length}-square ship!${state.phase === "over" ? "" : " Fire again."}`, "good");
     else if (outcome === "hit") setStatus("Hit! Fire again.", "good");
     else setStatus("Miss.");
@@ -668,6 +680,7 @@ async function replayAi(before, shots) {
     const [row, col] = shot.square;
     ownOverride.grid[row][col] = shot.outcome;
     fresh.add(`own:${row},${col}`);
+    playShot(shot.outcome, 0.6);
     const ship = state.human_board.ships.find((s) => s.squares.some(([r, c]) => r === row && c === col));
     if (shot.sunk_ship) {
       for (const [r, c] of shot.sunk_ship.squares) ownOverride.grid[r][c] = "sunk";
@@ -717,13 +730,38 @@ function showResult() {
 function wire() {
   els.play.addEventListener("click", async () => {
     if (els.titleScreen.classList.contains("firing")) return;
+    unlock();
     if (!reducedMotion()) {
       els.titleScreen.classList.add("firing");
       await new Promise((resolve) => setTimeout(resolve, 900));
     }
-    await newGame();
+    if (unfinished()) {
+      // Back from the home page: carry on with the battle that was left.
+      render();
+      showScreen("game");
+      setStatus(state.phase === "setup" ? "Welcome back. Finish placing your fleet." : "Welcome back. Your turn.");
+    } else {
+      await newGame();
+    }
     els.titleScreen.classList.remove("firing");
   });
+
+  els.home.addEventListener("click", () => {
+    els.result.hidden = true;
+    renderTitle();
+    showScreen("title");
+    window.scrollTo(0, 0);
+  });
+
+  els.sound.addEventListener("click", () => {
+    setMuted(!isMuted());
+    renderSoundButton();
+    if (!isMuted()) {
+      unlock();
+      playShot("hit", 0.5);
+    }
+  });
+  renderSoundButton();
 
   els.dock.addEventListener("pointerdown", (event) => {
     const item = event.target.closest(".dock-ship");
@@ -818,13 +856,63 @@ function wire() {
   }).observe(els.ownBoard);
 }
 
+// ---------- Home page ----------
+
+const unfinished = () => state !== null && state.phase !== "over";
+
+function renderSoundButton() {
+  els.sound.setAttribute("aria-pressed", String(!isMuted()));
+  els.sound.title = isMuted() ? "Sound off" : "Sound on";
+}
+
+/** Fill the home page with what the server knows: fleet, opponents and the resume note. */
+function renderTitle(config = state?.config) {
+  if (config) {
+    els.factBoard.textContent = `${config.size} × ${config.size}`;
+    els.factFleet.textContent = `${config.ships.length} ships`;
+    els.stepTextPlace.textContent = `Drag ${config.ships.length} ships (${config.ships.join(", ")} squares long) onto a ${config.size} × ${config.size} grid, or let chance place them.`;
+  }
+  if (opponents.length) {
+    els.factOpponents.textContent = String(opponents.length);
+    const names = opponents.map((o) => o.display_name);
+    els.stepTextOpponents.textContent = `${names.slice(0, -1).join(", ")} or ${names.at(-1)}: from a random shooter to AIs that reason about where your ships can be.`;
+  }
+  els.resumeNote.hidden = !unfinished();
+  if (unfinished()) {
+    const opponent = opponents.find((o) => o.name === state.opponent);
+    els.resumeNote.textContent = `Continue your battle against ${opponent?.display_name ?? state.opponent}`;
+  }
+}
+
+/** The benchmark challenge: how many shots the best AI needs. Hidden without results. */
+async function renderChallenge() {
+  try {
+    const stats = await api.stats(configName);
+    const best = stats.ais[0];
+    const worst = stats.ais.at(-1);
+    if (!best) return;
+    renderTitle(stats.config);
+    const fmt = (n) => n.toLocaleString("en-US", { maximumFractionDigits: 1 });
+    els.challenge.innerHTML = `
+      <span class="challenge-label">Benchmark, ${fmt(stats.games)} games</span>
+      <span class="challenge-text"><strong>${best.display_name}</strong> sinks a whole fleet in
+      <span class="challenge-number">${fmt(best.mean)}</span> shots on average.
+      ${worst && worst !== best ? `${worst.display_name} needs ${fmt(worst.mean)}.` : ""} Can you beat it?</span>`;
+    els.challenge.hidden = false;
+  } catch {
+    els.challenge.hidden = true;
+  }
+}
+
 async function init() {
   els.blueprint.innerHTML = blueprintSvg();
   // Lets CSS draw every line of the blueprint from start to end.
   for (const part of els.blueprint.querySelectorAll(".bp-draw > :not([stroke-dasharray])")) {
     part.setAttribute("pathLength", "1");
   }
+  els.stepIconPlace.innerHTML = hullSvg(4);
   wire();
+  renderChallenge();
   try {
     opponents = await api.opponents();
   } catch (error) {
@@ -851,6 +939,7 @@ async function init() {
       state = null;
     }
   }
+  renderTitle();
   showScreen("title");
 }
 
