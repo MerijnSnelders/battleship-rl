@@ -4,7 +4,7 @@
 
 import { api, ApiError } from "./api.js";
 import { blueprintSvg, hullSvg } from "./ships.js";
-import { isMuted, playShot, setMuted, unlock } from "./sound.js";
+import { isMuted, playResult, playShot, setMuted, unlock } from "./sound.js";
 
 const STORAGE_KEY = "battleship-rl:game";
 const DEFAULT_OPPONENT = "hunt_target";
@@ -702,14 +702,15 @@ async function replayAi(before, shots) {
 function afterTurn() {
   render();
   if (state.phase === "over") {
-    showResult();
+    showResult({ sting: true });
   } else if (state.phase === "playing") {
     const tone = els.status.dataset.tone;
     if (!/Fire again/.test(els.status.textContent)) setStatus("Your turn. Pick a square in enemy waters.", tone === "alert" ? "" : tone);
   }
 }
 
-function showResult() {
+/** Open the battle report. `sting` plays the win or lose sound, only when the game just ended. */
+function showResult({ sting = false } = {}) {
   const won = state.winner === "human";
   const view = state.ai_board.view;
   const strikes = view.grid.flat().filter((s) => s === "hit" || s === "sunk").length;
@@ -722,6 +723,7 @@ function showResult() {
   setTimeout(() => {
     els.result.hidden = false;
     els.resultNewGame.focus();
+    if (sting) playResult(won);
   }, reducedMotion() ? 0 : 700);
 }
 
@@ -796,6 +798,8 @@ function wire() {
     if (square && !busy) fire(Number(square.dataset.row), Number(square.dataset.col));
   });
 
+  // The first click anywhere allows audio, so the sound files are ready before the first shot.
+  window.addEventListener("pointerdown", unlock, { once: true });
   window.addEventListener("pointermove", onPointerMove);
   window.addEventListener("pointerup", onPointerUp);
   window.addEventListener("pointercancel", () => cancelDrag());
