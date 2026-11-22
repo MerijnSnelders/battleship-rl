@@ -79,6 +79,7 @@ def state(game_id: str, opponent: str, game: Game) -> dict[str, Any]:
             "unplaced": list(game.human_board.unplaced),
             "legal_starts": legal_starts(game) if game.phase is Phase.SETUP else None,
             "view": game.human_board.view().to_dict(),
+            "heatmap": heatmap(game.ai_heatmap()),
         },
         "ai_board": {
             "view": game.ai_board.view().to_dict(),

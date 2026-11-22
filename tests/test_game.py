@@ -303,6 +303,62 @@ def test_the_same_seed_and_actions_replay_the_same_game(config, ai_name):
     assert play(7) != play(8)
 
 
+heatmap_ais = pytest.mark.parametrize(
+    "ai_name", ["hunt_target", "probability_density", "monte_carlo"]
+)
+
+
+def test_the_next_heatmap_is_none_outside_the_playing_phase():
+    game = game_in_setup(SMALL, ai=create("probability_density"))
+    assert game.ai_heatmap() is None
+
+    game.start()
+    assert game.ai_heatmap() is not None
+
+    for square in ai_ship_squares(game):
+        game.fire(square)
+    assert game.phase is Phase.OVER
+    assert game.ai_heatmap() is None
+
+
+def test_the_next_heatmap_is_none_for_an_ai_without_one():
+    game = started(SMALL, Side.HUMAN, ai=create("random"))
+
+    assert game.ai_heatmap() is None
+
+
+@configs
+@heatmap_ais
+def test_the_next_heatmap_is_the_one_the_next_ai_shot_is_chosen_from(config, ai_name):
+    game = started(config, Side.HUMAN, ai=create(ai_name))
+
+    for square in ai_open_water(game)[:5]:
+        if game.phase is not Phase.PLAYING:
+            break
+        expected = game.ai_heatmap()
+        turn = game.fire(square).ai_turn
+        assert np.array_equal(turn[0].heatmap, expected)
+
+
+@configs
+@heatmap_ais
+def test_asking_for_the_next_heatmap_never_changes_the_game(config, ai_name):
+    def play(ask):
+        game = Game(config, create(ai_name), 3)
+        game.random_fleet()
+        game.start()
+        shots = []
+        for square in ai_open_water(game) + ai_ship_squares(game):
+            if game.phase is Phase.OVER:
+                break
+            if ask:
+                game.ai_heatmap()
+            shots.extend(shot.result for shot in game.fire(square).ai_turn)
+        return shots
+
+    assert play(ask=True) == play(ask=False)
+
+
 def test_a_heatmap_of_a_real_ai_is_on_the_board():
     game = started(SMALL, Side.HUMAN, ai=create("probability_density"))
 

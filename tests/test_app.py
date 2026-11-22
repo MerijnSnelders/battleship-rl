@@ -342,6 +342,25 @@ def test_every_opponent_plays_a_whole_game_with_heatmaps_as_promised(client, opp
             assert min(min(row) for row in heatmap) >= 0
 
 
+@pytest.mark.parametrize("opponent", names())
+def test_the_state_carries_the_heatmap_of_the_next_ai_shot(client, opponent):
+    has_heatmap = get(opponent).has_heatmap()
+    game = new_game(client, opponent=opponent)
+    assert game["human_board"]["heatmap"] is None
+
+    state = started(client, opponent=opponent)["state"]
+    for response in play_to_the_end(client, state["id"], "small"):
+        if response["ai_turn"]:
+            assert response["ai_turn"][0]["heatmap"] == state["human_board"]["heatmap"]
+        state = response["state"]
+        if state["phase"] == "over" or not has_heatmap:
+            assert state["human_board"]["heatmap"] is None
+        else:
+            heatmap = state["human_board"]["heatmap"]
+            assert len(heatmap) == 6 and all(len(row) == 6 for row in heatmap)
+            assert max(max(row) for row in heatmap) in {0, 1}
+
+
 def test_the_same_seed_gives_the_same_ai_fleet(client):
     def final_ai_ships(seed):
         game_id = started(client, seed=seed)["state"]["id"]

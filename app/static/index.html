@@ -89,11 +89,22 @@
 
     <div class="boards">
       <section id="own-side" class="side own" aria-label="Your board">
-        <h2 class="side-title">Your fleet</h2>
+        <div class="side-head">
+          <h2 class="side-title">Your fleet</h2>
+          <button id="heatmap-button" class="button ghost small heat-toggle" type="button" aria-pressed="false" hidden
+            title="Show where the AI wants to fire on your board">
+            <span class="switch" aria-hidden="true"></span>
+            <span>AI heatmap</span>
+          </button>
+        </div>
         <div class="board-frame">
           <div class="labels cols" aria-hidden="true"></div>
           <div class="labels rows" aria-hidden="true"></div>
           <div id="own-board" class="board"></div>
+        </div>
+        <div id="heatmap-legend" class="heat-legend" hidden>
+          <span>AI's preference</span>
+          <span class="heat-scale" aria-hidden="true">Low <span class="heat-ramp"></span> High</span>
         </div>
         <div id="own-fleet" class="fleet-status" aria-label="Your ships"></div>
       </section>

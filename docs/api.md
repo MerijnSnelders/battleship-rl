@@ -72,7 +72,8 @@ Between requests it is always the human's turn while the game is playing, becaus
     "ships": [{"start": [0, 0], "length": 5, "orientation": "horizontal", "squares": [[0, 0], "..."]}],
     "unplaced": [],
     "legal_starts": null,
-    "view": {"size": 10, "grid": [["unknown", "miss", "..."]], "sunk_ships": [], "shot_count": 3, "game_over": false}
+    "view": {"size": 10, "grid": [["unknown", "miss", "..."]], "sunk_ships": [], "shot_count": 3, "game_over": false},
+    "heatmap": [[0.4286, 0.6429, "..."], "..."]
   },
   "ai_board": {
     "view": {"size": 10, "grid": [["hit", "unknown", "..."]], "sunk_ships": [], "shot_count": 1, "game_over": false},
@@ -89,6 +90,7 @@ Between requests it is always the human's turn while the game is playing, becaus
   ```json
   [{"length": 3, "horizontal": [[0, 0], [0, 1], "..."], "vertical": [[0, 0], "..."]}, {"length": 2, "...": "..."}]
   ```
+- `human_board.heatmap` is the AI's heatmap for its next shot at the human's board, scaled like the heatmaps in `ai_turn` (see below). Draw it during the human's turn to show where the AI will fire next. It is `null` outside the playing phase and for AIs without a heatmap. Asking for it never changes the AI's shots, and the first shot of the next `ai_turn` carries the same heatmap.
 - `ai_board.view` is the human's player view of the AI's board. Each square is `unknown`, `miss`, `hit` or `sunk`, and the ships sunk so far are listed with their squares. `ai_board.ships` stays `null` until the phase is `over`.
 
 ### Shots and the AI's turn

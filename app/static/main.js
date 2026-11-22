@@ -7,8 +7,10 @@ import { blueprintSvg, hullSvg } from "./ships.js";
 import { isMuted, playResult, playShot, setMuted, unlock } from "./sound.js";
 
 const STORAGE_KEY = "battleship-rl:game";
+const HEATMAP_KEY = "battleship-rl:heatmap";
 const DEFAULT_OPPONENT = "hunt_target";
 const AI_SHOT_DELAY = 500;
+const AI_AIM_DELAY = 400; // how long the heatmap and crosshair show before each AI shot
 const DRAG_THRESHOLD = 6;
 const COLS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -25,6 +27,8 @@ const els = {
   ownBoard: $("own-board"),
   enemyBoard: $("enemy-board"),
   ownFleet: $("own-fleet"),
+  heatButton: $("heatmap-button"),
+  heatLegend: $("heatmap-legend"),
   enemyFleet: $("enemy-fleet"),
   dock: $("dock"),
   opponents: $("opponents"),
@@ -67,6 +71,8 @@ let busy = false;
 let gesture = null; // pointer down on a dock ship or a placed ship, maybe becoming a drag
 let suppressClick = false;
 let ownOverride = null; // the own board's view while the AI's turn is being played back
+let heatOverride = null; // {heatmap, aim} drawn instead of the state's heatmap during playback
+let showHeat = loadHeatSetting();
 const fresh = new Set(); // marks to animate on the next render, as "board:row,col"
 const freshSunk = new Set(); // sunk ships to animate, as "board:row,col" of their start
 
@@ -90,6 +96,22 @@ function saved() {
     return localStorage.getItem(STORAGE_KEY);
   } catch {
     return null;
+  }
+}
+
+function loadHeatSetting() {
+  try {
+    return localStorage.getItem(HEATMAP_KEY) === "on";
+  } catch {
+    return false;
+  }
+}
+
+function saveHeatSetting(on) {
+  try {
+    localStorage.setItem(HEATMAP_KEY, on ? "on" : "off");
+  } catch {
+    // Storage blocked: the switch resets on reload.
   }
 }
 
@@ -146,6 +168,10 @@ function shipFromSquares(squares) {
   };
 }
 
+function squareStyle(row, col, n) {
+  return `left:${(col / n) * 100}%;top:${(row / n) * 100}%;width:${100 / n}%;height:${100 / n}%`;
+}
+
 function position(el, [row, col], length, orient, n) {
   const across = orient === "horizontal" ? length : 1;
   const down = orient === "horizontal" ? 1 : length;
@@ -176,7 +202,7 @@ function buildBoard(board, n) {
       );
     }
   }
-  board.innerHTML = `${squares.join("")}<div class="layer ships"></div><div class="layer marks"></div>`;
+  board.innerHTML = `${squares.join("")}<div class="layer heat"></div><div class="layer ships"></div><div class="layer marks"></div>`;
   const frame = board.parentElement;
   frame.style.setProperty("--n", n);
   frame.querySelector(".cols").innerHTML = Array.from({ length: n }, (_, i) => `<span>${COLS[i]}</span>`).join("");
@@ -199,8 +225,7 @@ function renderMarks(board, boardName, grid) {
       if (square === "unknown") return;
       const id = `${boardName}:${r},${c}`;
       const isFresh = fresh.delete(id) ? " fresh" : "";
-      const style = `left:${(c / n) * 100}%;top:${(r / n) * 100}%;width:${100 / n}%;height:${100 / n}%`;
-      marks.push(`<div class="mark ${square}${isFresh}" style="${style}"></div>`);
+      marks.push(`<div class="mark ${square}${isFresh}" style="${squareStyle(r, c, n)}"></div>`);
     }),
   );
   board.querySelector(".marks").innerHTML = marks.join("");
@@ -229,7 +254,37 @@ function renderOwn() {
   }
   if (preview) layer.append(preview);
   renderMarks(els.ownBoard, "own", view.grid);
+  renderHeat();
   renderFleet(els.ownFleet, view.sunk_ships);
+}
+
+// ---------- AI heatmap (drawn from the server's numbers, never computed) ----------
+
+const hasHeatmap = () => Boolean(opponents.find((o) => o.name === state?.opponent)?.has_heatmap);
+const heatOn = () => showHeat && hasHeatmap();
+
+/** What to draw on the own board: playback's heatmap and aim, or the one for the next shot. */
+function heatSource() {
+  if (!heatOn()) return null;
+  if (heatOverride) return heatOverride;
+  if (state.phase !== "playing") return null;
+  return { heatmap: state.human_board.heatmap, aim: null };
+}
+
+function renderHeat() {
+  const n = size();
+  const source = heatSource();
+  const parts = [];
+  source?.heatmap?.forEach((row, r) =>
+    row.forEach((value, c) => {
+      if (value > 0) parts.push(`<div class="heat-square" style="grid-area:${r + 1}/${c + 1};--v:${value}"></div>`);
+    }),
+  );
+  if (source?.aim) parts.push(`<div class="aim" style="${squareStyle(...source.aim, n)}"></div>`);
+  els.ownBoard.querySelector(".heat").innerHTML = parts.join("");
+  els.heatButton.hidden = !hasHeatmap();
+  els.heatButton.setAttribute("aria-pressed", String(showHeat));
+  els.heatLegend.hidden = !heatOn() || state.phase !== "playing";
 }
 
 function renderEnemy() {
@@ -634,6 +689,7 @@ async function startBattle() {
     const result = await api.start(state.id);
     state = result.state;
     selected = null;
+    if (result.ai_turn.length) heatOverride = { heatmap: result.ai_turn[0].heatmap, aim: null };
     render();
     if (result.ai_turn.length) {
       setStatus("Coin flip: the AI fires first.", "alert");
@@ -650,8 +706,11 @@ async function fire(row, col) {
   if (state?.phase !== "playing" || state.ai_board.view.grid[row][col] !== "unknown") return;
   await act(async () => {
     const before = state.human_board.view;
+    const beforeHeat = state.human_board.heatmap;
     const result = await api.fire(state.id, row, col);
     state = result.state;
+    // The own board has not changed yet, so the heatmap from before still holds.
+    if (result.ai_turn.length) heatOverride = { heatmap: beforeHeat, aim: null };
     fresh.add(`enemy:${row},${col}`);
     if (result.shot.sunk_ship) freshSunk.add(`enemy:${key(result.shot.sunk_ship.start)}`);
     ownOverride = structuredClone(before);
@@ -666,6 +725,7 @@ async function fire(row, col) {
       await replayAi(before, result.ai_turn);
     }
     ownOverride = null;
+    heatOverride = null;
     render();
     afterTurn();
   });
@@ -678,6 +738,14 @@ async function replayAi(before, shots) {
   setStatus("The AI is firing...", "alert");
   for (const shot of shots) {
     const [row, col] = shot.square;
+    if (heatOn()) {
+      // Show what the AI is thinking: its heatmap and the square it picked, then fire.
+      heatOverride = { heatmap: shot.heatmap, aim: shot.square };
+      setStatus("The AI is aiming...", "alert");
+      renderOwn();
+      await sleep(AI_AIM_DELAY);
+    }
+    heatOverride = { heatmap: null, aim: null };
     ownOverride.grid[row][col] = shot.outcome;
     fresh.add(`own:${row},${col}`);
     playShot(shot.outcome, 0.6);
@@ -696,6 +764,7 @@ async function replayAi(before, shots) {
     await sleep(AI_SHOT_DELAY);
   }
   ownOverride = null;
+  heatOverride = null;
   els.body.classList.remove("ai-turn");
 }
 
@@ -753,6 +822,12 @@ function wire() {
     renderTitle();
     showScreen("title");
     window.scrollTo(0, 0);
+  });
+
+  els.heatButton.addEventListener("click", () => {
+    showHeat = !showHeat;
+    saveHeatSetting(showHeat);
+    if (state) renderHeat();
   });
 
   els.sound.addEventListener("click", () => {
