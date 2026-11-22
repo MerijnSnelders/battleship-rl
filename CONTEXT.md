@@ -24,6 +24,10 @@ _Avoid_: Direction, rotation
 Putting a ship on a board at a start square with an orientation. The start square is the ship's top-left end, so a ship never extends left or up from it.
 _Avoid_: Position, deployment
 
+**Legal placement**:
+A placement the board accepts right now: the ship lies fully on the board, overlaps no ship already placed, and its length is still needed by the fleet. Which placements are legal changes with every ship placed or removed.
+_Avoid_: Valid placement, allowed position
+
 **Fleet**:
 The ships a game config prescribes for each player, given as ship lengths. Several ships may share a length.
 _Avoid_: Army, ship set

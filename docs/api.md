@@ -10,7 +10,7 @@ All bodies are JSON. Squares are `[row, col]`, counted from the top-left square 
 
 1. `GET /api/opponents` to fill the opponent selector.
 2. `POST /api/games` with the chosen opponent. The phase is `setup`, and the AI's fleet is already placed (and hidden).
-3. Place the human's fleet: `POST .../ships` one ship at a time, `POST .../ships/random`, `DELETE .../ships?row=&col=` to take a ship off, `DELETE .../ships` to clear. Every response is the new state, so the frontend never needs to know the placement rules.
+3. Place the human's fleet: `POST .../ships` one ship at a time, `POST .../ships/random`, `DELETE .../ships?row=&col=` to take a ship off, `DELETE .../ships` to clear. Every response is the new state, including `legal_starts`, so the frontend never needs to know the placement rules. There is no move: moving or turning a ship is a remove followed by a place.
 4. `POST .../start` once `human_board.unplaced` is empty. A coin flip picks the first shooter. If the AI wins it, its opening turn is in the response. The phase becomes `playing`.
 5. `POST .../fire` for each human shot. A hit or sink earns another shot, so `ai_turn` is empty. After a miss the AI takes its whole turn (until its first miss or game over), and every AI shot is in `ai_turn`, in order.
 6. When either fleet is sunk the phase becomes `over`, `winner` is set and `ai_board.ships` reveals the AI's fleet.
@@ -71,6 +71,7 @@ Between requests it is always the human's turn while the game is playing, becaus
   "human_board": {
     "ships": [{"start": [0, 0], "length": 5, "orientation": "horizontal", "squares": [[0, 0], "..."]}],
     "unplaced": [],
+    "legal_starts": null,
     "view": {"size": 10, "grid": [["unknown", "miss", "..."]], "sunk_ships": [], "shot_count": 3, "game_over": false}
   },
   "ai_board": {
@@ -83,6 +84,11 @@ Between requests it is always the human's turn while the game is playing, becaus
 - `phase` is `setup`, `playing` or `over`.
 - `turn` is `human` while playing, otherwise `null`. `first_shooter` is `null` during setup, and `winner` is `null` until the game is over. All three hold `human` or `ai`.
 - `human_board.ships` are the human's own ships. `unplaced` lists the lengths still to place, in fleet order. `view` shows what the AI's shots revealed.
+- `human_board.legal_starts` lists, during setup, every legal placement of the ships still to place: one entry per distinct length in `unplaced`, holding the start squares that are legal for each orientation. Outside setup it is `null`. The frontend looks a placement up here to colour its preview, so it never needs the placement rules:
+
+  ```json
+  [{"length": 3, "horizontal": [[0, 0], [0, 1], "..."], "vertical": [[0, 0], "..."]}, {"length": 2, "...": "..."}]
+  ```
 - `ai_board.view` is the human's player view of the AI's board. Each square is `unknown`, `miss`, `hit` or `sunk`, and the ships sunk so far are listed with their squares. `ai_board.ships` stays `null` until the phase is `over`.
 
 ### Shots and the AI's turn

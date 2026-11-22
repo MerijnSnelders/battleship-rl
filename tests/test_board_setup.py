@@ -78,3 +78,41 @@ def test_ships_are_locked_once_a_shot_is_fired(config):
     with pytest.raises(FleetLockedError):
         board.clear()
     assert board.ships[0] == ship
+
+
+@configs
+def test_on_an_empty_board_every_ship_that_fits_is_a_legal_placement(config):
+    length = config.ships[0]
+    fits_along_a_row = config.size - length + 1
+
+    placements = Board(config).legal_placements(length)
+
+    assert len(placements) == 2 * config.size * fits_along_a_row
+    assert all(placement.length == length for placement in placements)
+
+
+@configs
+def test_legal_placements_are_exactly_what_place_accepts(config):
+    board = Board(config)
+    board.place(row_ship(0, config.ships[0]))
+    length = config.ships[-1]
+    everything = [
+        Ship(start=(row, col), length=length, orientation=orientation)
+        for orientation in Orientation
+        for row in range(-1, config.size + 1)
+        for col in range(-1, config.size + 1)
+    ]
+
+    legal = set(board.legal_placements(length))
+
+    assert legal == {ship for ship in everything if board.can_place(ship)}
+    assert not any(set(ship.squares) & set(board.ships[0].squares) for ship in legal)
+
+
+@configs
+def test_a_length_the_fleet_no_longer_needs_has_no_legal_placements(config):
+    board = Board(config)
+    for row, length in enumerate(config.ships):
+        board.place(row_ship(row, length))
+
+    assert board.legal_placements(config.ships[0]) == ()
