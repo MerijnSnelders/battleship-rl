@@ -32,6 +32,9 @@ class AI(ABC):
     description: ClassVar[str] = ""
     """One sentence on how the AI picks its shots, shown in the opponent list."""
 
+    explanation: ClassVar[str] = ""
+    """A few sentences on how the AI plays and where it is strong or weak, for the stats page."""
+
     @classmethod
     def has_heatmap(cls) -> bool:
         """Whether this AI shows a heatmap, so the frontend knows to offer the toggle."""

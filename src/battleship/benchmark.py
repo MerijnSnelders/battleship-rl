@@ -54,6 +54,14 @@ def display_name(name: str) -> str:
         return name
 
 
+def explanation(name: str) -> str:
+    """The stats page's explanation of an AI, or "" for an AI this install does not have."""
+    try:
+        return get(name).explanation
+    except UnknownAIError:
+        return ""
+
+
 def results_path(config_name: str, directory: Path = RESULTS_DIR) -> Path:
     """Where the benchmark results of a config live: benchmark.json for standard."""
     stem = "benchmark" if config_name == "standard" else f"benchmark_{config_name}"
@@ -62,6 +70,8 @@ def results_path(config_name: str, directory: Path = RESULTS_DIR) -> Path:
 
 def stats(data: dict[str, Any]) -> dict[str, Any]:
     """Benchmark results made small for the stats page: summaries and histograms, no raw shots.
+
+    Each AI carries its display name and explanation, so the page needs no other request.
 
     Each AI's histogram lists [shots to finish, number of games] for every shot count that
     occurred, lowest first. AIs come out from fewest to most mean shots.
@@ -73,6 +83,7 @@ def stats(data: dict[str, Any]) -> dict[str, Any]:
             {
                 "name": name,
                 "display_name": display_name(name),
+                "explanation": explanation(name),
                 "games": len(ai["shots"]),
                 **{key: ai[key] for key in ("mean", "median", "std", "ci95", "min", "max")},
                 "histogram": [[shots, counts[shots]] for shots in sorted(counts)],

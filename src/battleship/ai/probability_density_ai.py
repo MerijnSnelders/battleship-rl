@@ -30,6 +30,12 @@ class ProbabilityDensityAI(AI):
 
     display_name = "Probability density"
     description = "Fires where the ships still afloat fit in the most ways."
+    explanation = (
+        "For every square it counts the possible placements of the ships still afloat that "
+        "cover it, counting placements over hits more heavily, and fires at the highest count. "
+        "That steers its search towards the open middle of the board and finishes ships it has "
+        "found. It judges each ship on its own, so it ignores that ships cannot overlap."
+    )
 
     def _choose_shot(self, view: PlayerView) -> Square:
         counts = self.placement_counts(view)

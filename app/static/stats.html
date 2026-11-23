@@ -1,0 +1,74 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1d33">
+  <title>Benchmark · battleship-rl</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="/static/style.css">
+  <link rel="stylesheet" href="/static/stats.css">
+  <script type="module" src="/static/stats.js"></script>
+</head>
+<body class="stats-body">
+  <main class="stats-page">
+    <header class="topbar">
+      <a class="button ghost small icon-button" href="/" aria-label="Back to the home page">
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10 3 L5 8 L10 13"/></svg>
+        <span>Home</span>
+      </a>
+      <span class="brand">Battleship<span class="title-accent">-RL</span></span>
+      <span class="opponent-label">Benchmark</span>
+      <a class="button danger small" href="/">Play</a>
+    </header>
+
+    <section class="stats-intro" aria-labelledby="stats-heading">
+      <p class="sheet-label">Drawing no. RL-02 &middot; Benchmark results</p>
+      <h1 id="stats-heading" class="stats-title">How many shots does each AI need?</h1>
+      <p id="method" class="stats-method">Loading the benchmark&hellip;</p>
+      <div id="config-switch" class="config-switch" role="radiogroup" aria-label="Board" hidden></div>
+    </section>
+
+    <p id="stats-error" class="stats-error" role="alert" hidden></p>
+
+    <div id="stats-content" hidden>
+      <section class="stats-block" aria-labelledby="table-heading">
+        <h2 id="table-heading" class="panel-title">Results</h2>
+        <div class="table-frame">
+          <table class="stats-table">
+            <thead>
+              <tr>
+                <th scope="col" class="rank">#</th>
+                <th scope="col" class="ai-col">AI</th>
+                <th scope="col">Mean <span class="th-note">95% CI</span></th>
+                <th scope="col">Median</th>
+                <th scope="col">Std</th>
+                <th scope="col">Min to max</th>
+                <th scope="col" id="baseline-head">vs Hunt/target</th>
+              </tr>
+            </thead>
+            <tbody id="stats-rows"></tbody>
+          </table>
+        </div>
+        <p class="hint">Shots to finish per benchmark game, fewer is better. The last column is the difference in mean shots to Hunt/target, the baseline the RL agent has to beat.</p>
+      </section>
+
+      <section class="stats-block" aria-labelledby="chart-heading">
+        <h2 id="chart-heading" class="panel-title">Distribution</h2>
+        <div id="legend" class="chart-legend" aria-label="Show or hide an AI"></div>
+        <div id="chart" class="chart">
+          <div id="readout" class="chart-readout" hidden></div>
+        </div>
+        <p class="hint">Share of games that took each number of shots. Dashed line: mean. Hover or tap the chart to read the values, and click an AI above to hide or show it.</p>
+      </section>
+
+      <section class="stats-block" aria-labelledby="ais-heading">
+        <h2 id="ais-heading" class="panel-title">The AIs</h2>
+        <div id="explanations" class="explanations"></div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

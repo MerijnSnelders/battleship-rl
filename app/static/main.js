@@ -981,7 +981,9 @@ async function renderChallenge() {
       <span class="challenge-label">Benchmark, ${fmt(stats.games)} games</span>
       <span class="challenge-text"><strong>${best.display_name}</strong> sinks a whole fleet in
       <span class="challenge-number">${fmt(best.mean)}</span> shots on average.
-      ${worst && worst !== best ? `${worst.display_name} needs ${fmt(worst.mean)}.` : ""} Can you beat it?</span>`;
+      ${worst && worst !== best ? `${worst.display_name} needs ${fmt(worst.mean)}.` : ""} Can you beat it?</span>
+      <span class="challenge-more">See every AI's results &rarr;</span>`;
+    if (configName !== "standard") els.challenge.href = `/stats?config=${encodeURIComponent(configName)}`;
     els.challenge.hidden = false;
   } catch {
     els.challenge.hidden = true;

@@ -122,6 +122,7 @@ Between requests it is always the human's turn while the game is playing, becaus
     {
       "name": "probability_density",
       "display_name": "Probability density",
+      "explanation": "For every square it counts the possible placements ...",
       "games": 10000,
       "mean": 44.7, "median": 44.0, "std": 9.2, "ci95": [44.5, 44.9], "min": 20, "max": 83,
       "histogram": [[20, 1], [21, 3], "..."]
@@ -130,7 +131,9 @@ Between requests it is always the human's turn while the game is playing, becaus
 }
 ```
 
-AIs are sorted from fewest to most mean shots to finish. Each `histogram` entry is `[shots to finish, number of games]`, for every shot count that occurred.
+AIs are sorted from fewest to most mean shots to finish. Each `histogram` entry is `[shots to finish, number of games]`, for every shot count that occurred. `explanation` is a few sentences on how the AI plays, for the stats page; it is empty for an AI in the results that this install does not have.
+
+The stats page at `/stats` (`app/static/stats.html`) shows this as a table, a distribution chart and a card per AI. It follows `?config=small` and switches between every config that has results.
 
 ## Errors
 

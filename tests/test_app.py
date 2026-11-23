@@ -96,6 +96,13 @@ def test_index_serves_html(client):
     assert "battleship-rl" in response.text
 
 
+def test_stats_page_serves_html(client):
+    response = client.get("/stats")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/html")
+    assert "/static/stats.js" in response.text
+
+
 def test_opponents_lists_every_registered_ai_with_its_text(client):
     opponents = client.get("/api/opponents").json()
 
@@ -390,6 +397,7 @@ def test_stats_give_summaries_and_histograms(client, config):
     for ai in data["ais"]:
         assert sum(count for _, count in ai["histogram"]) == ai["games"] == data["games"]
         assert "shots" not in ai
+        assert ai["explanation"] == get(ai["name"]).explanation
 
 
 def test_stats_refuse_an_unknown_config_or_missing_results(client, tmp_path):

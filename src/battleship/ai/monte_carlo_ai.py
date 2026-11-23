@@ -43,6 +43,12 @@ class MonteCarloAI(AI):
         "Draws many possible layouts of the ships still afloat and fires where a ship lies "
         "most often."
     )
+    explanation = (
+        "It draws many samples: possible layouts of all ships still afloat at once, so unlike "
+        "Probability density it respects that ships cannot overlap. It fires at the square that "
+        "holds a ship in the most samples. The extra precision costs far more computing time "
+        "per shot, and with a limited number of samples its counts are noisy."
+    )
 
     def __init__(self, samples: int = DEFAULT_SAMPLES) -> None:
         super().__init__()

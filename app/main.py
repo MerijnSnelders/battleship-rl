@@ -207,6 +207,11 @@ def create_app(store: GameStore | None = None, results_dir: Path = RESULTS_DIR) 
     def index() -> FileResponse:
         return FileResponse(STATIC_DIR / "index.html")
 
+    @app.get("/stats")
+    def stats_page() -> FileResponse:
+        """The benchmark results; the page itself fetches them from /api/stats."""
+        return FileResponse(STATIC_DIR / "stats.html")
+
     app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
     return app
 

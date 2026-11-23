@@ -157,6 +157,8 @@ def test_every_registered_ai_has_a_display_name_and_description(name):
     cls = get(name)
     assert cls.display_name
     assert cls.description.endswith(".")
+    assert cls.explanation.endswith(".")
+    assert len(cls.explanation) > len(cls.description)
 
 
 def test_has_heatmap_follows_whether_the_ai_overrides_it():

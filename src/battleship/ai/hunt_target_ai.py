@@ -26,6 +26,12 @@ class HuntTargetAI(AI):
 
     display_name = "Hunt/target"
     description = "Fires at random until it hits, then at the squares next to its hits."
+    explanation = (
+        "It plays like most people: in hunt mode it fires at random, and after a hit it switches "
+        "to target mode and fires next to its hits, along the line once two hits line up. "
+        "Finishing ships is quick, but finding them is still pure luck. It is the baseline the "
+        "RL agent has to beat."
+    )
 
     def _choose_shot(self, view: PlayerView) -> Square:
         squares = self.target_squares(view) or self.unknown_squares(view)

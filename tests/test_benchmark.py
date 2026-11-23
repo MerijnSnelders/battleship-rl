@@ -3,11 +3,12 @@ import json
 import numpy as np
 import pytest
 
-from battleship.ai import UnknownAIError, names
+from battleship.ai import UnknownAIError, get, names
 from battleship.benchmark import (
     BenchmarkMismatchError,
     display_name,
     dumps,
+    explanation,
     game_seeds,
     main,
     play_games,
@@ -144,6 +145,11 @@ def test_display_names_come_from_the_ai_and_fall_back_to_the_name():
     assert display_name("rl_agent") == "rl_agent"
 
 
+def test_explanations_come_from_the_ai_and_are_empty_for_an_unknown_one():
+    assert explanation("hunt_target") == get("hunt_target").explanation
+    assert explanation("rl_agent") == ""
+
+
 def test_results_path_names_the_standard_file_without_a_suffix(tmp_path):
     assert results_path("standard", tmp_path) == tmp_path / "benchmark.json"
     assert results_path("small", tmp_path) == tmp_path / "benchmark_small.json"
@@ -161,6 +167,7 @@ def test_stats_keep_summaries_and_histograms_but_drop_raw_shots():
     for ai in summary["ais"]:
         assert "shots" not in ai
         assert ai["display_name"] == display_name(ai["name"])
+        assert ai["explanation"] == explanation(ai["name"])
         assert ai["games"] == 8
         assert sum(count for _, count in ai["histogram"]) == 8
         counted = [shots for shots, _ in ai["histogram"]]
