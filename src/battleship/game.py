@@ -160,6 +160,16 @@ class Game:
             return FireResult(shot, self._ai_turn())
         return FireResult(shot, ())
 
+    def ai_heatmap(self) -> np.ndarray | None:
+        """The AI's heatmap for its next shot at the human's board, as things stand now.
+
+        None outside the playing phase and for an AI without a heatmap. Asking for it never
+        changes the AI's next shot, so the same seed still replays the same game.
+        """
+        if self._phase is not Phase.PLAYING:
+            return None
+        return self.ai.heatmap(self.human_board.view())
+
     def _ai_turn(self) -> tuple[AIShot, ...]:
         shots = []
         while True:

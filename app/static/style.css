@@ -16,6 +16,10 @@
   --red: #e3483c;
   --red-deep: #a8291f;
   --red-soft: rgba(227, 72, 60, 0.2);
+  --heat-low: #f2b33d;
+  --heat-high: #e3483c;
+  --heat-min-opacity: 0.2;
+  --heat-max-opacity: 0.8;
   --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
   --font-display: "Barlow Condensed", "Arial Narrow", "Roboto Condensed", sans-serif-condensed, sans-serif;
   --sq: 40px;
@@ -308,10 +312,11 @@ body[data-screen="game"] #game-screen {
   animation: fade-out 0.4s 0.5s ease-in forwards;
 }
 
+/* Centred on the PLAY shell: main.js sets --impact-x and --impact-y when it is pressed. */
 .impact-ring {
   position: absolute;
-  left: 50%;
-  top: 50%;
+  left: var(--impact-x, 50%);
+  top: var(--impact-y, 50%);
   width: 60px;
   height: 60px;
   margin: -30px 0 0 -30px;
@@ -624,6 +629,23 @@ body[data-screen="game"] #game-screen {
   color: var(--muted);
 }
 
+/* The own side's title row, with the heatmap switch on the right. */
+.side-head {
+  width: min(100%, 480px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding-left: 22px;
+}
+
+.side-head .side-title {
+  width: auto;
+  margin: 0;
+  padding-left: 0;
+}
+
 /* Before the battle only the empty enemy board is dimmed; its title stays readable. */
 body[data-phase="setup"] .enemy .board-frame {
   opacity: 0.4;
@@ -716,6 +738,131 @@ body.ai-turn .enemy {
 
 body.ai-turn .own .board {
   box-shadow: 0 0 0 3px var(--red-soft);
+}
+
+/* ---------- AI heatmap on the own board ---------- */
+
+/* Laid out on the board's own grid, so neighbouring squares meet without seams. */
+.layer.heat {
+  display: grid;
+  grid-template-columns: repeat(var(--n, 10), 1fr);
+  grid-template-rows: repeat(var(--n, 10), 1fr);
+}
+
+/* A square's colour runs from amber (low) to red (high) and grows more solid with --v. */
+.heat-square {
+  background: color-mix(in oklab, var(--heat-high) calc(var(--v) * 100%), var(--heat-low));
+  opacity: calc(var(--heat-min-opacity) + var(--v) * (var(--heat-max-opacity) - var(--heat-min-opacity)));
+  transition: opacity 0.2s ease;
+}
+
+/* The square the AI is about to fire at. */
+.aim {
+  position: absolute;
+  animation: aim-in 0.25s ease-out;
+}
+
+.aim::before {
+  content: "";
+  position: absolute;
+  inset: 16%;
+  border: 2px solid var(--line-strong);
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 2px rgba(8, 22, 39, 0.55),
+    inset 0 0 0 2px rgba(8, 22, 39, 0.55);
+}
+
+.aim::after {
+  content: "";
+  position: absolute;
+  inset: 4%;
+  background:
+    linear-gradient(var(--line-strong), var(--line-strong)) center / 2px 100% no-repeat,
+    linear-gradient(var(--line-strong), var(--line-strong)) center / 100% 2px no-repeat;
+  -webkit-mask: radial-gradient(circle, transparent 22%, #000 23%);
+  mask: radial-gradient(circle, transparent 22%, #000 23%);
+}
+
+@keyframes aim-in {
+  from {
+    opacity: 0;
+    transform: scale(1.6);
+  }
+}
+
+.heat-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  border-color: var(--line-dim);
+}
+
+.heat-toggle .switch {
+  position: relative;
+  width: 24px;
+  height: 12px;
+  border: 1px solid currentColor;
+  border-radius: 6px;
+}
+
+.heat-toggle .switch::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  transition: transform 0.15s ease;
+}
+
+.heat-toggle[aria-pressed="true"] {
+  color: var(--line-strong);
+  border-color: var(--heat-low);
+}
+
+.heat-toggle[aria-pressed="true"] .switch {
+  border-color: var(--heat-low);
+}
+
+.heat-toggle[aria-pressed="true"] .switch::after {
+  transform: translateX(12px);
+  background: var(--heat-low);
+}
+
+.heat-legend {
+  width: min(100%, 480px);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 12px;
+  margin-top: 10px;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.heat-scale {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.heat-ramp {
+  display: inline-block;
+  width: 96px;
+  height: 8px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    color-mix(in oklab, var(--heat-low) calc(var(--heat-min-opacity) * 100%), transparent),
+    color-mix(in oklab, var(--heat-high) calc(var(--heat-max-opacity) * 100%), transparent)
+  );
 }
 
 /* ---------- Ships ---------- */
