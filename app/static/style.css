@@ -312,10 +312,11 @@ body[data-screen="game"] #game-screen {
   animation: fade-out 0.4s 0.5s ease-in forwards;
 }
 
+/* Centred on the PLAY shell: main.js sets --impact-x and --impact-y when it is pressed. */
 .impact-ring {
   position: absolute;
-  left: 50%;
-  top: 50%;
+  left: var(--impact-x, 50%);
+  top: var(--impact-y, 50%);
   width: 60px;
   height: 60px;
   margin: -30px 0 0 -30px;

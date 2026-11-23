@@ -803,6 +803,11 @@ function wire() {
     if (els.titleScreen.classList.contains("firing")) return;
     unlock();
     if (!reducedMotion()) {
+      // Start the impact ring where the shell is, not in the middle of the (tall) page.
+      const shell = els.play.getBoundingClientRect();
+      const screen = els.titleScreen.getBoundingClientRect();
+      els.titleScreen.style.setProperty("--impact-x", `${shell.left + shell.width / 2 - screen.left}px`);
+      els.titleScreen.style.setProperty("--impact-y", `${shell.top + shell.height / 2 - screen.top}px`);
       els.titleScreen.classList.add("firing");
       await new Promise((resolve) => setTimeout(resolve, 900));
     }
